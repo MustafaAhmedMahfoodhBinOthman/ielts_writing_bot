@@ -22,12 +22,7 @@ logger = logging.getLogger(__name__)
 TASK, QUESTION, ESSAY, TASK_TYPE_SPECIFICATION = range(4)
 
 # Initialize the EssayEvaluator
-# Claude_API_KEY = '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'
-# Gemini_API_Key = 'AIzaSyAtnlV6rfm_OsSt9M_w9ZaiFn3NjdjSVuw'
-# Gemini_API_Key2 = 'AIzaSyDbU_8cAQCAhr59bqtGf40FV-92KCKkLWs'
-# Gemini_API_Key3 = 'AIzaSyBOb6xrGvLxRBvgMEUyWvTSGKZVDGT4j3w'
-# Gemini_API_Key4 = 'AIzaSyB5Cy4KIg4xKwz2poq3sywJEvqI0BL10iQ'
-# Gemini_API_Key5 = 'AIzaSyBUpws7IJIKo9rZI1YKSBPQj_RpPWwTqFo'
+
 
 
 Claude_API_KEY = os.getenv('Claude_API_KEY')
