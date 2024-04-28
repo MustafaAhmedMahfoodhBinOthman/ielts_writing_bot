@@ -1046,7 +1046,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
             
         if task == 'Task 1':
              evaluation_results = {
-            "task": f"Task: {task}' '{task_type_specification}",
+            "task": f"Task: {task} - {task_type_specification}",
             "num_words": num_words,
             "task_response_score": task_response_score,
             "task_response_text": task_response_text,
@@ -1098,7 +1098,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
             # return evaluation_report
         return evaluation_results
         
-
+    
     def grammar_spelling2(self, essay):
         
         prompt = f"""
@@ -1212,6 +1212,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         response = self.evaluate2(prompt)
         print('recieved result', len(response.split()))
         # print(response)
+        
         cleaned_response, score = self.remove_band_score(response)
         return score, cleaned_response
     
@@ -1262,7 +1263,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         if digit is None:
             print('No score found in the evaluation result')
             return result, None
-
+        
         num = float(digit)
         print('the score is ',num)
         if '**Band Score**:' in result:
@@ -1270,11 +1271,16 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         else:
             pattern = re.compile(r'(\*{2})?Band Score:?(\*{2})?\s*\d+(\.\d+)?(\*{2})?\n+', re.IGNORECASE)
         cleaned_result = pattern.sub('', result)
+        
+        patter = r'[_*[\]()~`>#+-=|{}.!]'
+        
+        # Replace special characters with an empty string
+        cleaned_text = re.sub(patter, '', cleaned_result)
 
         rounded_score = round(num - 0.1)
         
         self.band_score.append(rounded_score)
-        cleaned_result = f"{cleaned_result}"
+        cleaned_result = f"{cleaned_text}"
 
         return cleaned_result, rounded_score
 
@@ -1284,6 +1290,14 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
             return digit.group(1)
         else:
             return None
+    def remove_special_characters(text):
+    # Define the pattern to match special characters
+        pattern = r'[_*[\]()~`>#+-=|{}.!]'
+        
+        # Replace special characters with an empty string
+        cleaned_text = re.sub(pattern, '', text)
+        
+        return cleaned_text
 
     def evaluate2(self, prompt):
         genai.configure(api_key=self.keys)
