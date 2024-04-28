@@ -10,7 +10,7 @@ import time
 from essay_evaluator import EssayEvaluator
 import asyncio
 import os
-from server import server
+# from server import server
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -20,8 +20,6 @@ logger = logging.getLogger(__name__)
 
 # Define conversation states
 TASK, QUESTION, ESSAY, TASK_TYPE_SPECIFICATION = range(4)
-
-# Initialize the EssayEvaluator
 
 
 
@@ -108,7 +106,7 @@ def check_word_count(essay_text: str, question_text: str, task_type: str) -> str
         return "Your essay is too short. The written words count is {}. Please send the essay again with at least 250 words for Task 2. [Click here to start over](/start)".format(num_words)
     else:
         return None
-    
+
 
 
 async def essay(update: Update, context: ContextTypes.DEFAULT_TYPE) :
@@ -141,7 +139,7 @@ async def essay(update: Update, context: ContextTypes.DEFAULT_TYPE) :
     try:
         evaluation_task = asyncio.create_task(asyncio.to_thread(evaluator.evaluate_essay, essay_text, task, question, task_type_specification))
 
-        for i in range(100, 0, -1):
+        for i in range(85, 0, -1):
             await message.edit_text(f"Evaluating your essay. it takes time please wait...\n\nEvaluation will be ready in {i} seconds...")
             await asyncio.sleep(1)
 
@@ -164,10 +162,12 @@ async def essay(update: Update, context: ContextTypes.DEFAULT_TYPE) :
         await update.message.reply_text(f"Grammar and Accuracy: \nscore: {evaluation_results['grammar_accuracy_score']}\n\n{evaluation_results['grammar_accuracy_text']}\n", parse_mode='Markdown')
 
         await update.message.reply_text(f"Overall Band Score:   {evaluation_results['overall_score']}", parse_mode='Markdown')
- 
+
         await update.message.reply_text("**If you want a detailed feedback with more features**, \n\nTry the website for free\n https://ielts-writing-ai.streamlit.app/", parse_mode='Markdown')
 
-        await update.message.reply_text("You can start evaluating again by clicking /start", parse_mode='Markdown')
+        await update.message.reply_text("You can start evaluating again by clicking /start\n\n if you find it helpful Do not forget sharing the bot 😊", parse_mode='Markdown')
+        # await update.message.reply_text("This bot is currently in Beta. If there is any issue or suggestion, please contact me @mustafa_binothman.", parse_mode='Markdown')
+        # await update.message.reply_text("Do not forget sharing the bot 😊", parse_mode='Markdown')
         print("Evaluation completed and sent to user")
 
     except Exception as e:
@@ -176,7 +176,7 @@ async def essay(update: Update, context: ContextTypes.DEFAULT_TYPE) :
         return ESSAY
 
     return ConversationHandler.END
-    
+
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Evaluation has stopped. Thank you for using the IELTS Writing Evaluation Bot!\n [Click here to start over](/start)")
@@ -204,6 +204,6 @@ def main() :
     application.run_polling()
 
 if __name__ == '__main__':
-    
-    server()
+
+    # server()
     main()
