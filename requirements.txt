@@ -14,4 +14,4 @@ gspread
 openai
 plotly
 pandas
-telegram
+python-telegram-bot
