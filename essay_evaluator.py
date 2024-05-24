@@ -2,13 +2,22 @@
 import re
 import anthropic
 import google.generativeai as genai
-
-
+from groq import Groq
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
+load_dotenv()
 class EssayEvaluator:
-    def __init__(self, model, model_vision, keys, Claude_API_KEY):
+    def __init__(self, model, model_vision, used_key, Claude_API_KEY):
         self.model = model
         self.model_vision = model_vision
-        self.keys = keys
+        self.keys = used_key
+        self.key_1 = os.getenv('groq_API1')
+        self.key_2 = os.getenv('groq_API2')
+        self.key_3 = os.getenv('groq_API3')
+        self.key_4 = os.getenv('groq_API4')
+        self.key_5 = os.getenv('groq_API5')
+        self.key_6 = os.getenv('groq_API6')
         self.Claude_API_KEY = Claude_API_KEY
         self.essay = ''
         self.task = ''
@@ -21,6 +30,7 @@ class EssayEvaluator:
         self.coherence = ''
         self.lexic = ''
         self.suggeted_score = ''
+        self.api_erorr = 0
         #"------------------------------------------------------------"
         self.TASK_RESPONSE_PROMPT = f"""
 You are an IELTS examiner and your role is to assess IELTS Writing Essays. In this task {self.task}, your focus is to evaluate only the TASK RESPONSE of the given essay {self.essay} based on the official Task Response assessment criteria provided by IELTS.org.
@@ -44,6 +54,14 @@ You are an IELTS examiner and your role is to assess IELTS Writing Essays. In th
         
         i hope you will not let me down and use what i told you above 
 
+        important note: If the provided essay {self.essay} is not relevant to the question {self.question} or the type of the task {self.task}, this will result in a lower score maybe 4 or lower is derived score in this case, as it does not fulfill the criteria requirements. Additionally, if the essay does not appear to be a 70% IELTS essay and may contain links or non-English words, a lower score should be given accordingly.
+    
+        another important note : if the question has two parts and the candidate  should address both parts in the essay, 
+        the candidate must address both parts adequately. If they only discuss one view or fail to provide their opinion, their Task Response score will suffer. Additionally, 
+        if the candidate misinterprets the question or provides irrelevant information, it will negatively affect their score.
+        Please note these considerations when evaluating the essay and assigning a score.
+        
+        
 Instructions for assessing Task Response:
 For {self.task} of both AC Writing tests, candidates are required to formulate and 
     develop a position in relation to a given prompt in the form of a question or 
@@ -93,7 +111,28 @@ Band descriptors for the TR criterion:
 
     Band 0: The candidate did not attempt the task, so no assessment of task response can be made.
      
+     Please note these considerations when evaluating the essay and assigning a score.
+    
+    Coherence and Cohesion Errors:
 
+    - Identify any errors related to coherence and cohesion, such as lack of logical flow, inadequate use of cohesive devices, or poor paragraph organization.
+    - Include specific examples of coherence and cohesion errors from the essay.
+    
+    Lexical Errors:
+
+    - Identify any errors related to vocabulary usage, such as inaccurate word choice, spelling mistakes, or inappropriate word formation.
+    - Include specific examples of lexical errors from the essay.
+    
+    Grammatical Errors:
+
+    - Identify any errors related to grammar, such as subject-verb agreement, verb tense, article usage, or sentence structure issues.
+    - Include specific examples of grammatical errors from the essay.
+    
+    Other Errors:
+
+    - Identify any other errors or mistakes that do not fit into the above categories, such as punctuation or formatting issues.
+    - Include specific examples of other errors from the essay.
+    
 Structure your response as follows:
 
 Band Score: Provide a whole number score between 0 and 9. If your initial assessment yields a decimal score, round it to the nearest whole number.
@@ -181,7 +220,31 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
     
      Band 1: The content is wholly unrelated to the task. Any copied rubric must be discounted. Responses of 20 words or fewer are rated at Band 1.
     
-    
+    you should also consider this terms:
+         Overview:
+
+       - Assess if the essay provides a clear overview of the main features or key information from the given data/diagram.
+       - Identify any missing or irrelevant information in the overview.
+       - Provide concise suggestions for improving the overview.
+       
+        Key Features:
+
+        - Evaluate if the essay covers the key features or trends presented in the data/diagram.
+        - Identify any missing or irrelevant key features.
+        - Offer specific recommendations to better highlight and explain the key features.
+        
+         Data Comparison and Accuracy:
+
+        - Assess if the essay accurately compares and contrasts the relevant data points or information.
+        - Identify any inaccuracies, inconsistencies, or misinterpretations of the data.
+        - Provide clear guidance for improving data comparison and accuracy.
+        
+        Logical Structure and Coherence:
+
+        - Evaluate the logical structure and coherence of the essay.
+        - Identify any areas where the flow of information is unclear or disjointed.
+        - Suggest concrete ways to enhance the logical structure and coherence of the response.
+        
      Structure your response as follows:
          if the question asks the candidate to describe key features and make comparisons, 
           but the candidate only describes the features without making comparisons, they will lose points in 
@@ -335,6 +398,38 @@ you should be fair when you assess this criteria and give a precise band score a
         and to make it is to you to decide the deserved score which i am confident you will do that here is the suggested band score that the tool estimated for you because it wants helping you {self.suggeted_score}
         
         i hope you will not let me down and use what i told you above 
+        
+        important note: If the provided essay {self.essay} is not relevant to the question {self.question} or the type of the task {self.task}, this will result in a lower score maybe 4 or lower is derived score in this case, as it does not fulfill the criteria requirements. Additionally, if the essay does not appear to be a 70% IELTS essay and may contain links or non-English words, a lower score should be given accordingly.
+
+        Please note these considerations when evaluating the essay and assigning a score.
+        Overall Essay Structure:
+
+        - Assess the overall structure and organization of the essay.
+        - Identify any issues related to the introduction, body paragraphs, and conclusion.
+        - Include specific examples of essay structure issues from the essay.
+        
+        Paragraph Organization:
+
+        - Evaluate the organization and structure of individual paragraphs in the essay.
+        - Identify any issues related to topic sentences, supporting details, or concluding sentences.
+        - Include specific examples of paragraph organization issues from the essay.
+        
+        Logical Sequencing and Progression:
+
+        - Assess the logical sequencing and progression of ideas within and between paragraphs.
+        - Identify any instances where the flow of ideas is illogical, disjointed, or hard to follow.
+        - Include specific examples of logical sequencing and progression issues from the essay.
+        
+        Linking Devices and Cohesive Mechanisms:
+
+        - Evaluate the use of linking devices (e.g., connectives, transitional phrases) and cohesive mechanisms (e.g., referencing, substitution) in the essay.
+        - Identify any instances of missing, inappropriate, or overused linking devices or cohesive mechanisms.
+        - Include specific examples of linking device and cohesive mechanism issues from the essay.
+        
+        Repetition and Redundancy:
+
+        - Identify instances of unnecessary repetition or redundancy that affect the coherence and cohesion of the essay.
+        - Include specific examples of repetition and redundancy issues from the essay.
     Instructions for assessing COHERENCE AND COHESION:
     COHERENCE AND COHESION (CC) 
     This criterion is concerned with the overall organisation and logical development of 
@@ -448,7 +543,39 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
     - the density and communicative effect of errors in spelling. 
     - the density and communicative effect of errors in word formation.
     
-    also consider this terms carfully:
+    
+     also consider this terms carfully:
+        Vocabulary Errors:
+
+        - Identify any errors related to vocabulary usage, such as incorrect word choice, inaccurate meaning, or inappropriate register.
+        - Include specific examples of vocabulary errors from the essay.
+        
+        Word Formation Errors:
+
+        - Identify any errors related to word formation, such as incorrect prefixes, suffixes, or parts of speech.
+        - Include specific examples of word formation errors from the essay.
+        
+        Spelling Errors:
+
+        - Identify any spelling errors in the essay.
+        - Include specific examples of spelling errors from the essay.
+        
+        Collocation Errors:
+
+        - Identify any errors related to collocations, such as incorrect word combinations or awkward phrasing.
+        - Include specific examples of collocation errors from the essay.
+        
+        Repetition and Redundancy:
+
+        - Identify instances of unnecessary repetition or redundancy in the vocabulary used.
+        - Include specific examples of repetition and redundancy from the essay.
+        
+        Lexical Range and Sophistication:
+
+        - Assess the range and sophistication of vocabulary used in the essay.
+        - Provide suggestions for improving lexical diversity and sophistication.
+        
+    in addtion consider this terms carfully:
     - Using a wide range of vocabulary accurately and appropriately
     - Demonstrating the ability to use less common lexical items
     - Avoiding repetition by using synonyms or paraphrasing
@@ -1043,9 +1170,9 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
            
         overall_score = round(sum(self.band_score) / 4)
         
-            
+       
         if task == 'Task 1':
-             evaluation_results = {
+            evaluation_results = {
             "task": f"Task: {task} - {task_type_specification}",
             "num_words": num_words,
             "task_response_score": task_response_score,
@@ -1073,7 +1200,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
             "overall_score": overall_score
         }
 
-
+        
             # evaluation_report = f"IELTS Writing Evaluation Report\n\n"
             # if task == 'Task 1':
                 
@@ -1100,7 +1227,30 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         
     
     def grammar_spelling2(self, essay):
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    ""
+                   
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    "hello"
+                ),
+            },
+        ]
+        client = OpenAI(api_key="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", base_url="https://api.perplexity.ai")
+        response = client.chat.completions.create(
+            model="mixtral-8x7b-instruct",
+            messages=messages
+        )
         
+        # print(response.choices[0].message.content)
+        perp = (response.choices[0].message.content)
+        # print(perp)
         prompt = f"""
         As an advanced grammar checker, your task is to meticulously review the provided essay {essay} and identify any misspelled words and grammatical errors. Provide accurate corrections and clear explanations to help the writer understand and improve their language usage.
 
@@ -1136,36 +1286,112 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         Remember, your goal is to provide accurate, helpful, and constructive feedback that enables the writer to enhance their grammar and spelling skills in the context of IELTS essay writing.
         """
 
-        max_retries = 3
+        max_retries = 1
         retries = 0
         while retries < max_retries:
             try:
                 print('grammar_spelling2')
-                genai.configure(api_key=self.keys[0])
-                task = self.model.generate_content(prompt, stream=True)
-                task.resolve()
-                task_ch = task.text
-                return task_ch
+                client = Groq(
+                        api_key="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"
+                    )
+
+                chat_completion = client.chat.completions.create(
+                        messages=[
+                            # Set an optional system message. This sets the behavior of the
+                            # assistant and can be used to provide specific instructions for
+                            # how it should behave throughout the conversation.
+                            {
+                                "role": "system",
+                                # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
+                                "content": prompt
+                            },
+                            # Set a user message for the assistant to respond to.
+                            {
+                                "role": "user",
+                                # "content": prompt,
+                                "content": self.essay,
+                            }
+                        ],
+                        model="llama3-70b-8192",
+                    )
+
+                result = chat_completion.choices[0].message.content
+                return result
             except Exception as e:
                 retries += 1
                 print("An internal error has occurred:", e)
                 print("Retrying...")
                 continue
         else:
-            return self.claude_model2("claude-3-haiku-20240307", prompt)
+                try:
+                        client = Groq(
+                                api_key="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"
+                            )
+
+                        chat_completion = client.chat.completions.create(
+                                messages=[
+                                    # Set an optional system message. This sets the behavior of the
+                                    # assistant and can be used to provide specific instructions for
+                                    # how it should behave throughout the conversation.
+                                    {
+                                        "role": "system",
+                                        # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
+                                        "content": prompt
+                                    },
+                                    # Set a user message for the assistant to respond to.
+                                    {
+                                        "role": "user",
+                                        "content": prompt,
+                                        "content": self.essay,
+                                    }
+                                ],
+                                model="llama3-8b-8192",
+                            )
+
+                        result = chat_completion.choices[0].message.content
+                        return result
+                except Exception as e:
+                        raise Exception("Error occurred while calling Groq API")   
     def essay_analysis(self, prompt):
         i = 1
         print(f'started essay_analysis {i} ')
-        genai.configure(api_key=self.keys)
+        # genai.configure(api_key=self.keys)
         max_retries = 3
         retries = 0
         while retries < max_retries:
             try:
                 for _ in range(2):
-                    task = self.model.generate_content(prompt, stream=True)
-                    task.resolve()
-                    task_ch = task.text
-                    return task_ch
+                    # task = self.model.generate_content(prompt, stream=True)
+                    # task.resolve()
+                    # task_ch = task.text
+                    # return task_ch
+                    client = Groq(
+                        api_key="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"
+                    )
+
+                    chat_completion = client.chat.completions.create(
+                        messages=[
+                            # Set an optional system message. This sets the behavior of the
+                            # assistant and can be used to provide specific instructions for
+                            # how it should behave throughout the conversation.
+                            {
+                                "role": "system",
+                                # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
+                                "content": prompt
+                            },
+                            # Set a user message for the assistant to respond to.
+                            {
+                                "role": "user",
+                                # "content": prompt,
+                                "content": self.essay,
+                            }
+                        ],
+                        model="llama3-70b-8192",
+                    )
+
+                    result = chat_completion.choices[0].message.content
+                    print("essay analysis")
+                    return result
                 i += 1
             except Exception as e:
                 retries += 1
@@ -1173,15 +1399,35 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
                 print("Retrying...")
                 continue
         else:
-            client = anthropic.Anthropic(api_key=self.Claude_API_KEY)
-            message = client.messages.create(
-                model="claude-3-haiku-20240307",
-                max_tokens=1000,
-                temperature=0.0,
-                messages=[{"role": "user", "content": prompt}]
-            )
-            content_block = message.content[0]
-            return content_block.text
+                    try:
+                        client = Groq(
+                                api_key="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"
+                            )
+
+                        chat_completion = client.chat.completions.create(
+                                messages=[
+                                    # Set an optional system message. This sets the behavior of the
+                                    # assistant and can be used to provide specific instructions for
+                                    # how it should behave throughout the conversation.
+                                    {
+                                        "role": "system",
+                                        # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
+                                        "content": prompt
+                                    },
+                                    # Set a user message for the assistant to respond to.
+                                    {
+                                        "role": "user",
+                                        "content": prompt,
+                                        "content": self.essay,
+                                    }
+                                ],
+                                model="llama3-70b-8192",
+                            )
+
+                        result = chat_completion.choices[0].message.content
+                        return result
+                    except Exception as e:
+                        raise Exception("Error occurred while calling Groq API")   
     def suggested_score_ana(self, task_analysis, task):
         
         prompt = f"""
@@ -1196,20 +1442,76 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         while retries < max_retries:
             try:
                 print('started suggested_score_ana')
-                task = self.model.generate_content(prompt, stream=True)
-                task.resolve()
-                task_ch = task.text
-                return task_ch
+                # task = self.model.generate_content(prompt, stream=True)
+                # task.resolve()
+                # task_ch = task.text
+                # return task_ch
+                client = Groq(
+                        api_key="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"
+                    )
+
+                chat_completion = client.chat.completions.create(
+                        messages=[
+                            # # Set an optional system message. This sets the behavior of the
+                            # # assistant and can be used to provide specific instructions for
+                            # # how it should behave throughout the conversation.
+                            # {
+                            #     "role": "system",
+                            #     # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
+                            #     "content": prompt
+                            # },
+                            # Set a user message for the assistant to respond to.
+                            {
+                                "role": "user",
+                                # "content": prompt,
+                                "content": prompt,
+                            }
+                        ],
+                        model="llama3-70b-8192",
+                    )
+
+                result = chat_completion.choices[0].message.content
+                print("siggested_score_succeded")
+                return result
             except Exception as e:
                 retries += 1
                 print("An internal error has occurred: now will use ", e)
                 print("Retrying...")
                 continue
-            
+        else:
+                    try:
+                        client = Groq(
+                                api_key="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"
+                            )
+
+                        chat_completion = client.chat.completions.create(
+                        messages=[
+                            # # Set an optional system message. This sets the behavior of the
+                            # # assistant and can be used to provide specific instructions for
+                            # # how it should behave throughout the conversation.
+                            # {
+                            #     "role": "system",
+                            #     # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
+                            #     "content": prompt
+                            # },
+                            # Set a user message for the assistant to respond to.
+                            {
+                                "role": "user",
+                                # "content": prompt,
+                                "content": prompt,
+                            }
+                        ],
+                        model="llama3-70b-8192",
+                    )
+
+                        result = chat_completion.choices[0].message.content
+                        return result
+                    except Exception as e:
+                        raise Exception("Error occurred while calling Groq API")   
     def evaluate_task_response(self, essay):
         prompt = self.TASK_RESPONSE_PROMPT.format(essay=essay)
         print('recieved prompt task response')
-        response = self.evaluate2(prompt)
+        response = self.evaluate2(prompt,'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', "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")
         print('recieved result', len(response.split()))
         # print(response)
         
@@ -1219,7 +1521,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
     def evaluate_task1_response_aca(self, essay):
         prompt = self.TASK_RESPONCE_1_ACA.format(essay=essay)
         print('recieved prompt task response')
-        response = self.evaluate2(prompt)
+        response = self.evaluate2(prompt,'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', "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")
         print('recieved result', len(response.split()))
         cleaned_response, score = self.remove_band_score(response)
         return score, cleaned_response
@@ -1227,7 +1529,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
     def evaluate_task1_response_gen(self, essay):
         prompt = self.TASK_RESPONCE_1_GEN.format(essay=essay)
         # print('recieved prompt')
-        response = self.evaluate2(prompt)
+        response = self.evaluate2(prompt,'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', "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")
         # print('recieved result', len(response.split()))
         print(response)
         cleaned_response, score = self.remove_band_score(response)
@@ -1237,7 +1539,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
     def evaluate_coherence_cohesion(self, essay):
         prompt = self.COHERENCE_COHESION_PROMPT.format(essay=essay)
         print('recieved prompt coherence')
-        response = self.evaluate2(prompt)
+        response = self.evaluate2(prompt,'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',"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")
         print('recieved result', len(response.split()))
         cleaned_response, score = self.remove_band_score(response)
         return score, cleaned_response
@@ -1245,7 +1547,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
     def evaluate_lexical_resources(self, essay):
         prompt = self.LEXICAL_RESOURCES_PROMPT.format(essay=essay)
         print('recieved prompt lexical')
-        response = self.evaluate2(prompt)
+        response = self.evaluate2(prompt,'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', "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")
         print('recieved result', len(response.split()))
         cleaned_response, score = self.remove_band_score(response)
         return score, cleaned_response
@@ -1253,7 +1555,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
     def evaluate_grammar_accuracy(self, essay):
         prompt = self.GRAMMAR_ACCURACY_PROMPT.format(essay=essay)
         print('recieved prompt grammar')
-        response = self.evaluate2(prompt)
+        response = self.evaluate2(prompt,'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',"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")
         print('recieved result', len(response.split()))
         cleaned_response, score = self.remove_band_score(response)
         return score, cleaned_response
@@ -1262,27 +1564,30 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         digit = self.extract_digit_from_essay(result)
         if digit is None:
             print('No score found in the evaluation result')
-            return result, None
-        
-        num = float(digit)
-        print('the score is ',num)
-        if '**Band Score**:' in result:
-            pattern = re.compile(r'\*{0,2}Band Score\*{0,2}:?\s*\*{0,2}\d+(\.\d+)?\*{0,2}\n?|\*+\n?', re.IGNORECASE)
+            raise Exception("Error occurred while calling Claude API")
+            # return result, None
         else:
-            pattern = re.compile(r'(\*{2})?Band Score:?(\*{2})?\s*\d+(\.\d+)?(\*{2})?\n+', re.IGNORECASE)
-        cleaned_result = pattern.sub('', result)
-        
-        patter = r'[_*[\]()~`>#+-=|{}.!]'
-        
-        # Replace special characters with an empty string
-        cleaned_text = re.sub(patter, '', cleaned_result)
+            num = float(digit)
+            print('the score is ',num)
+            if num <= 3:
+                raise Exception("Error: Score is too low")
+            if '**Band Score**:' in result:
+                pattern = re.compile(r'\*{0,2}Band Score\*{0,2}:?\s*\*{0,2}\d+(\.\d+)?\*{0,2}\n?|\*+\n?', re.IGNORECASE)
+            else:
+                pattern = re.compile(r'(\*{2})?Band Score:?(\*{2})?\s*\d+(\.\d+)?(\*{2})?\n+', re.IGNORECASE)
+            cleaned_result = pattern.sub('', result)
+            
+            patter = r'[_*[\]()~`>#+-=|{}.!]'
+            
+            # Replace special characters with an empty string
+            cleaned_text = re.sub(patter, '', cleaned_result)
 
-        rounded_score = round(num - 0.1)
-        
-        self.band_score.append(rounded_score)
-        cleaned_result = f"{cleaned_text}"
+            rounded_score = round(num - 0.1)
+            
+            self.band_score.append(rounded_score)
+            cleaned_result = f"{cleaned_text}"
 
-        return cleaned_result, rounded_score
+            return cleaned_result, rounded_score
 
     def extract_digit_from_essay(self, essay):
         digit = re.search(r'(?:^|\D)([3-9](?:\.\d+)?)(?!\d)', essay)
@@ -1299,43 +1604,84 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         
         return cleaned_text
 
-    def evaluate2(self, prompt):
+    def evaluate2(self, prompt, api, api2):
         genai.configure(api_key=self.keys)
-        max_retries = 3
+        max_retries = 1
         retries = 0
         while retries < max_retries:
             try:
-                task = self.model.generate_content(prompt, stream=True)
-                task.resolve()
-                task_ch = task.text
-                return task_ch
-            except Exception as e:
-                retries += 1
-                print("An internal error has occurred: now will use ", e)
-                print("Retrying...")
-                continue
-        else:
-            # If Gemini fails after all retries, switch to Claude 3
-            return self.claude_model("claude-3-haiku-20240307", prompt)
+                # task = self.model.generate_content(prompt, stream=True)
+                # task.resolve()
+                # task_ch = task.text
+                # return task_ch
+                client = Groq(
+                        api_key=api
+                    )
 
-    def claude_model(self, prompt):
-        max_retries = 3
-        retries = 0
-        while retries < max_retries:
-            try:
-                client = anthropic.Anthropic(api_key=self.Claude_API_KEY)
-                message = client.messages.create(
-                    model="claude-3-haiku-20240307",
-                    max_tokens=1000,
-                    temperature=0.0,
-                    messages=[{"role": "user", "content": prompt}]
-                )
-                content_block = message.content[0]
-                return content_block.text
+                chat_completion = client.chat.completions.create(
+                        messages=[
+                            # Set an optional system message. This sets the behavior of the
+                            # assistant and can be used to provide specific instructions for
+                            # how it should behave throughout the conversation.
+                            {
+                                "role": "system",
+                                # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
+                                "content": prompt
+                            },
+                            # Set a user message for the assistant to respond to.
+                            {
+                                "role": "user",
+                                # "content": prompt,
+                                "content": self.essay,
+                            }
+                        ],
+                        model="llama3-70b-8192",
+                    )
+
+                result = chat_completion.choices[0].message.content
+                return result
             except Exception as e:
                 retries += 1
+                # self.api_erorr += 1
                 print("An internal error has occurred: now will use ", e)
                 print("Retrying...")
                 continue
         else:
-            raise Exception("Error occurred while calling Claude API")
+            try:
+                client = Groq(
+                        api_key=api2
+                    )
+
+                chat_completion = client.chat.completions.create(
+                        messages=[
+                            # Set an optional system message. This sets the behavior of the
+                            # assistant and can be used to provide specific instructions for
+                            # how it should behave throughout the conversation.
+                            {
+                                "role": "system",
+                                # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
+                                "content": prompt
+                            },
+                            # Set a user message for the assistant to respond to.
+                            {
+                                "role": "user",
+                                # "content": prompt,
+                                "content": self.essay,
+                            }
+                        ],
+                        model="llama3-8b-8192",
+                    )
+
+                result = chat_completion.choices[0].message.content
+                return result
+            except Exception as e:
+                # self.api_erorr += 1
+                print(f"An internal error has occurred: {e}")
+                raise Exception("Error occurred while calling Claude API")
+                # error_message = f"An error occurred while evaluating your essay. Please try again later. Error details: {e}"
+                # return None, error_message
+                # if self.api_erorr >= 2:  # adjust this threshold as needed
+                #     error_message = "Error: API token limit exceeded. Please try again later."
+                #     return error_message
+                # else:
+                #     raise Exception("Error occurred while calling Groq API")
