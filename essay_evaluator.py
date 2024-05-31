@@ -6,6 +6,7 @@ from groq import Groq
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+import replicate
 load_dotenv()
 class EssayEvaluator:
     def __init__(self, model, model_vision, used_key, Claude_API_KEY):
@@ -18,6 +19,8 @@ class EssayEvaluator:
         self.key_4 = os.getenv('groq_API4')
         self.key_5 = os.getenv('groq_API5')
         self.key_6 = os.getenv('groq_API6')
+        self.perplxity = os.getenv('perplxity')
+        self.replicate = os.getenv('REPLICATE_API_TOKEN')
         self.Claude_API_KEY = Claude_API_KEY
         self.essay = ''
         self.task = ''
@@ -1242,7 +1245,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
                 ),
             },
         ]
-        client = OpenAI(api_key="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", base_url="https://api.perplexity.ai")
+        client = OpenAI(api_key=self.perplxity, base_url="https://api.perplexity.ai")
         response = client.chat.completions.create(
             model="mixtral-8x7b-instruct",
             messages=messages
@@ -1250,7 +1253,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         
         # print(response.choices[0].message.content)
         perp = (response.choices[0].message.content)
-        # print(perp)
+        print(perp)
         prompt = f"""
         As an advanced grammar checker, your task is to meticulously review the provided essay {essay} and identify any misspelled words and grammatical errors. Provide accurate corrections and clear explanations to help the writer understand and improve their language usage.
 
@@ -1324,34 +1327,45 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
                 continue
         else:
                 try:
-                        client = Groq(
-                                api_key="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"
-                            )
+                    print('trying the second API')
+                    # client = Groq(
+                    #     api_key="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"
+                    # )
 
-                        chat_completion = client.chat.completions.create(
-                                messages=[
-                                    # Set an optional system message. This sets the behavior of the
-                                    # assistant and can be used to provide specific instructions for
-                                    # how it should behave throughout the conversation.
-                                    {
-                                        "role": "system",
-                                        # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
-                                        "content": prompt
-                                    },
-                                    # Set a user message for the assistant to respond to.
-                                    {
-                                        "role": "user",
-                                        "content": prompt,
-                                        "content": self.essay,
-                                    }
-                                ],
-                                model="llama3-8b-8192",
-                            )
+                    # chat_completion = client.chat.completions.create(
+                    #         messages=[
+                    #             # Set an optional system message. This sets the behavior of the
+                    #             # assistant and can be used to provide specific instructions for
+                    #             # how it should behave throughout the conversation.
+                    #             {
+                    #                 "role": "system",
+                    #                 # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
+                    #                 "content": prompt
+                    #             },
+                    #             # Set a user message for the assistant to respond to.
+                    #             {
+                    #                 "role": "user",
+                    #                 # "content": prompt,
+                    #                 "content": self.essay,
+                    #             }
+                    #         ],
+                    #         model="llama3-70b-8192",
+                    #     )
 
-                        result = chat_completion.choices[0].message.content
-                        return result
+                    # result = chat_completion.choices[0].message.content
+                    # return result
+                    output = replicate.run(
+                    "meta/meta-llama-3-70b-instruct",
+                    input={'prompt':prompt},
+                    )
+                    result = ("".join(output))
+                    # st.markdown(result)
+                    print(len(result.split()))
+                    return result
                 except Exception as e:
-                        raise Exception("Error occurred while calling Groq API")   
+                    print('error', e)
+                    pass
+                        # raise Exception("Error occurred while calling Groq API")   
     def essay_analysis(self, prompt):
         i = 1
         print(f'started essay_analysis {i} ')
@@ -1360,7 +1374,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         retries = 0
         while retries < max_retries:
             try:
-                for _ in range(2):
+                
                     # task = self.model.generate_content(prompt, stream=True)
                     # task.resolve()
                     # task_ch = task.text
@@ -1392,7 +1406,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
                     result = chat_completion.choices[0].message.content
                     print("essay analysis")
                     return result
-                i += 1
+                
             except Exception as e:
                 retries += 1
                 print("An internal error has occurred: now will use ", e)
@@ -1400,34 +1414,45 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
                 continue
         else:
                     try:
-                        client = Groq(
-                                api_key="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"
-                            )
+                        print("trying second option")
+                        # client = Groq(
+                        #         api_key="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"
+                        #     )
 
-                        chat_completion = client.chat.completions.create(
-                                messages=[
-                                    # Set an optional system message. This sets the behavior of the
-                                    # assistant and can be used to provide specific instructions for
-                                    # how it should behave throughout the conversation.
-                                    {
-                                        "role": "system",
-                                        # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
-                                        "content": prompt
-                                    },
-                                    # Set a user message for the assistant to respond to.
-                                    {
-                                        "role": "user",
-                                        "content": prompt,
-                                        "content": self.essay,
-                                    }
-                                ],
-                                model="llama3-70b-8192",
-                            )
+                        # chat_completion = client.chat.completions.create(
+                        #         messages=[
+                        #             # Set an optional system message. This sets the behavior of the
+                        #             # assistant and can be used to provide specific instructions for
+                        #             # how it should behave throughout the conversation.
+                        #             {
+                        #                 "role": "system",
+                        #                 # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
+                        #                 "content": prompt
+                        #             },
+                        #             # Set a user message for the assistant to respond to.
+                        #             {
+                        #                 "role": "user",
+                        #                 "content": prompt,
+                        #                 "content": self.essay,
+                        #             }
+                        #         ],
+                        #         model="llama3-70b-8192",
+                        #     )
 
-                        result = chat_completion.choices[0].message.content
+                        # result = chat_completion.choices[0].message.content
+                        # return result
+                        output = replicate.run(
+                        "meta/meta-llama-3-70b-instruct",
+                        input={'prompt':prompt},
+                        )
+                        result = ("".join(output))
+                        # st.markdown(result)
+                        print(len(result.split()))
                         return result
                     except Exception as e:
-                        raise Exception("Error occurred while calling Groq API")   
+                        print('error essay analysis', e)
+                        pass
+                        # raise Exception("Error occurred while calling Groq API")   
     def suggested_score_ana(self, task_analysis, task):
         
         prompt = f"""
@@ -1480,34 +1505,46 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
                 continue
         else:
                     try:
-                        client = Groq(
-                                api_key="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"
+                        print("trying second option")
+                    #     client = Groq(
+                    #             api_key="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"
+                    #         )
+
+                    #     chat_completion = client.chat.completions.create(
+                    #     messages=[
+                    #         # # Set an optional system message. This sets the behavior of the
+                    #         # # assistant and can be used to provide specific instructions for
+                    #         # # how it should behave throughout the conversation.
+                    #         # {
+                    #         #     "role": "system",
+                    #         #     # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
+                    #         #     "content": prompt
+                    #         # },
+                    #         # Set a user message for the assistant to respond to.
+                    #         {
+                    #             "role": "user",
+                    #             # "content": prompt,
+                    #             "content": prompt,
+                    #         }
+                    #     ],
+                    #     model="llama3-70b-8192",
+                    # )
+
+                    #     result = chat_completion.choices[0].message.content
+                    #     return result
+                    # except Exception as e:
+                    #     raise Exception("Error occurred while calling Groq API")   
+                        output = replicate.run(
+                            "meta/meta-llama-3-70b-instruct",
+                        input={'prompt':prompt},
                             )
-
-                        chat_completion = client.chat.completions.create(
-                        messages=[
-                            # # Set an optional system message. This sets the behavior of the
-                            # # assistant and can be used to provide specific instructions for
-                            # # how it should behave throughout the conversation.
-                            # {
-                            #     "role": "system",
-                            #     # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
-                            #     "content": prompt
-                            # },
-                            # Set a user message for the assistant to respond to.
-                            {
-                                "role": "user",
-                                # "content": prompt,
-                                "content": prompt,
-                            }
-                        ],
-                        model="llama3-70b-8192",
-                    )
-
-                        result = chat_completion.choices[0].message.content
+                        result = ("".join(output))
+                            # st.markdown(result)
+                        print(len(result.split()))
                         return result
                     except Exception as e:
-                        raise Exception("Error occurred while calling Groq API")   
+                            print('error suggest score', e)
+                            pass
     def evaluate_task_response(self, essay):
         prompt = self.TASK_RESPONSE_PROMPT.format(essay=essay)
         print('recieved prompt task response')
@@ -1648,31 +1685,57 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
                 continue
         else:
             try:
-                client = Groq(
-                        api_key=api2
-                    )
+                print("trying seondoptionin evaluation  ")
+                # client = Groq(
+                #         api_key=api2
+                #     )
 
-                chat_completion = client.chat.completions.create(
-                        messages=[
-                            # Set an optional system message. This sets the behavior of the
-                            # assistant and can be used to provide specific instructions for
-                            # how it should behave throughout the conversation.
-                            {
-                                "role": "system",
-                                # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
-                                "content": prompt
-                            },
-                            # Set a user message for the assistant to respond to.
-                            {
-                                "role": "user",
-                                # "content": prompt,
-                                "content": self.essay,
-                            }
-                        ],
-                        model="llama3-8b-8192",
-                    )
+                # chat_completion = client.chat.completions.create(
+                #         messages=[
+                #             # Set an optional system message. This sets the behavior of the
+                #             # assistant and can be used to provide specific instructions for
+                #             # how it should behave throughout the conversation.
+                #             {
+                #                 "role": "system",
+                #                 # "content": "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment .",
+                #                 "content": prompt
+                #             },
+                #             # Set a user message for the assistant to respond to.
+                #             {
+                #                 "role": "user",
+                #                 # "content": prompt,
+                #                 "content": self.essay,
+                #             }
+                #         ],
+                #         model="llama3-8b-8192",
+                #     )
 
-                result = chat_completion.choices[0].message.content
+                # result = chat_completion.choices[0].message.content
+                # return result
+                messages = [
+                {
+                    "role": "system",
+                    "content": (
+                        # "you are IELTS Expert specialized in IELTS Writing Task 1 and Task 2 academic and General assessment . "
+                       prompt
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        self.essay
+                    ),
+                },
+                ]
+                client = OpenAI(api_key=self.perplxity, base_url="https://api.perplexity.ai")
+                response = client.chat.completions.create(
+                    model="llama-3-70b-instruct",
+                    messages=messages
+                )
+                
+                # print(response.choices[0].message.content)
+                result = (response.choices[0].message.content)
+                # print(result)
                 return result
             except Exception as e:
                 # self.api_erorr += 1
