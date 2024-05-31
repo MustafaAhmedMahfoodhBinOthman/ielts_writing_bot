@@ -18,6 +18,8 @@ from dotenv import load_dotenv
 # from datetime import datetime
 import datetime
 import time
+import pytz
+from datetime import datetime, timedelta
 load_dotenv()
 # Set up logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -89,14 +91,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TASK  # Ensure TASK is defined or replace with appropriate state management constant
 
 async def update_user_data(user_id, username):
-    import pytz
-    utc_time = datetime.datetime.now()
-    # Define the Mecca timezone
-    mecca_tz = pytz.timezone('Asia/Riyadh')  # Riyadh is in the same time zone as Mecca
-    # Convert UTC time to Mecca time
-    mecca_time = utc_time.replace(tzinfo=pytz.utc).astimezone(mecca_tz)
-    # Format the Mecca time as "Day/Month/Year Hour:Minute"
-    formatted_time = mecca_time.strftime("%d/%m/%Y %H:%M")
+    
+    # Get the current time in UTC
+    utc_time = datetime.now()
+
+    # Manually adjust the UTC time by subtracting 3 hours
+    adjusted_time = utc_time
+
+    # Format the adjusted time as "Day/Month/Year Hour:Minute"
+    formatted_time = adjusted_time.strftime("%d/%m/%Y %H:%M")
     username = username if username is not None else "None"
     data = {
         "user_id": user_id,
@@ -115,7 +118,52 @@ async def update_user_data(user_id, username):
         print("user id get updated: ", user_id,"username: ",username, "time: ", formatted_time)
     except Exception as e:
         print("error while updating the user data: ", e)
+async def insert_evaluation_data(user_id, username, evaluation_results):
+    print("insert_evaluation_data")
+    # Get the current time in UTC
+    utc_time = datetime.now()
 
+    # Manually adjust the UTC time by subtracting 3 hours
+    adjusted_time = utc_time
+
+
+    # Format the Mecca time as "Day/Month/Year Hour:Minute"
+    date_of_evaluation = adjusted_time.strftime("%d/%m/%Y %H:%M")
+    def extract_score(text):
+        match = re.search(r'\d+', text)  # This regex finds one or more digits
+        if match:
+            return int(match.group())  # Convert the found digits to an integer
+        return None  # Return None if no digits are found
+
+    # Combine score and text into one string for each criterion
+    task_response = f"Score: {evaluation_results['task_response_score']}\n\nEvaluation:\n{evaluation_results['task_response_text']}"
+    coherence_cohesion = f"Score: {evaluation_results['coherence_cohesion_score']}\n\nEvaluation:\n{evaluation_results['coherence_cohesion_text']}"
+    lexical_resources = f"Score: {evaluation_results['lexical_resources_score']}\n\nEvaluation:\n{evaluation_results['lexical_resources_text']}"
+    grammar_accuracy = f"Score: {evaluation_results['grammar_accuracy_score']}\n\nEvaluation:\n{evaluation_results['grammar_accuracy_text']}"
+    
+    data = {
+        "user_id": user_id,
+        "username": str(username),
+        "date_of_evaluation": str(date_of_evaluation),
+        "task": str(evaluation_results["task"]),
+        "num_words": str(evaluation_results["num_words"]),
+        "task_response": str(task_response),
+        "coherence_cohesion": str(coherence_cohesion),
+        "lexical_resources": str(lexical_resources),
+        "grammar_accuracy": str(grammar_accuracy),
+        "overall_score": str((evaluation_results["overall_score"]))  # Ensure overall_score is a string
+    }
+
+    # Insert data into the evaluations table
+    try:
+        supabase.table("evaluations_bot").insert(data).execute()
+        print("evaluation has added successfully")
+    except Exception as e:
+        print("erorr it could not add evaluation to the table", e)
+    # if response.error:
+    #     print("Failed to insert evaluation data:", response.error)
+    # else:
+    #     print("Evaluation data inserted successfully")
 async def task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -330,7 +378,7 @@ async def essay(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text("You can start evaluating again by clicking /start\n\n if you find it helpful Do not forget sharing the bot 😊\n\n if you have any suggestions to improve the bot please contact me @ielts_pathway", reply_markup=reply_markup, parse_mode='HTML')
-
+        await insert_evaluation_data(user_id, username, evaluation_results)
         # await update.message.reply_text("This bot is currently in Beta. If there is any issue or suggestion, please contact me @mustafa_binothman.", parse_mode='Markdown')
         # await update.message.reply_text("Do not forget sharing the bot 😊", parse_mode='Markdown')
         print("Evaluation completed and sent to user")
