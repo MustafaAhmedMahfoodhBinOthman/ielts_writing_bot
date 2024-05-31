@@ -1292,7 +1292,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
             try:
                 print('grammar_spelling2')
                 client = Groq(
-                        api_key="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"
+                        api_key="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"
                     )
 
                 chat_completion = client.chat.completions.create(
