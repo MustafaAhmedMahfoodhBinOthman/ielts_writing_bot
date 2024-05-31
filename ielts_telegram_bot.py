@@ -12,11 +12,12 @@ import asyncio
 import os
 from groq import Groq
 import re
-
+from supabase import create_client, Client
 # from server import server
 from dotenv import load_dotenv
-
-
+# from datetime import datetime
+import datetime
+import time
 load_dotenv()
 # Set up logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -33,7 +34,11 @@ TASK, QUESTION, ESSAY, TASK_TYPE_SPECIFICATION, IMAGE_OR_SKIP, IMAGE_UPLOAD = ra
 # Gemini_API_Key4 = 'AIzaSyB5Cy4KIg4xKwz2poq3sywJEvqI0BL10iQ'
 # Gemini_API_Key5 = 'AIzaSyBUpws7IJIKo9rZI1YKSBPQj_RpPWwTqFo'
 
-
+url = "https://twrfzriopjdkicchfqzs.supabase.co"
+# url = os.getenv('url')
+key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3cmZ6cmlvcGpka2ljY2hmcXpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTY2MTQ0NTgsImV4cCI6MjAzMjE5MDQ1OH0.WW-BxGtjADTRMuX2lBkPvSy2cbjxzYZls67VlgQlRF0"
+# key = os.getenv('supabase')
+supabase: Client = create_client(url, key)
 Claude_API_KEY = os.getenv('Claude_API_KEY')
 Gemini_API_Key = os.getenv('Gemini_API_Key') #mustafabinothman22
 Gemini_API_Key2 = os.getenv('Gemini_API_Key2') #mustafanotion
@@ -63,21 +68,53 @@ sonnet = "claude-3-sonnet-20240229"
 haiku = "claude-3-haiku-20240307"
 evaluator = EssayEvaluator(model, model_vision, used_key, REPLICATE_API_TOKEN)
 
-# async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) :
-#     await update.message.reply_text("Welcome to the IELTS Writing Evaluation Bot!")
-#     await update.message.reply_text("Please choose the task type (Task 1 or Task 2):")
-#     return TASK
-
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # user = update.message.from_user
+    # user_id = user.id
+    
+    # username = user.username  # Retrieve the username
+
+    # print("User ID:", user_id)
+    # print("Username:", username if username else "No username available")
+
     await update.message.reply_text("Welcome to the IELTS Writing Evaluation Bot!")
+    # await update_user_data(user_id, username)  # Pass the username to the update function
+
     keyboard = [
         [InlineKeyboardButton("Task 1", callback_data="Task 1")],
         [InlineKeyboardButton("Task 2", callback_data="Task 2")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Please choose the task type:", reply_markup=reply_markup)
-    return TASK
+    return TASK  # Ensure TASK is defined or replace with appropriate state management constant
 
+async def update_user_data(user_id, username):
+    import pytz
+    utc_time = datetime.datetime.now()
+    # Define the Mecca timezone
+    mecca_tz = pytz.timezone('Asia/Riyadh')  # Riyadh is in the same time zone as Mecca
+    # Convert UTC time to Mecca time
+    mecca_time = utc_time.replace(tzinfo=pytz.utc).astimezone(mecca_tz)
+    # Format the Mecca time as "Day/Month/Year Hour:Minute"
+    formatted_time = mecca_time.strftime("%d/%m/%Y %H:%M")
+    username = username if username is not None else "None"
+    data = {
+        "user_id": user_id,
+        "last_used": formatted_time,
+        "username": username
+    }
+    # Check if user exists
+    try:
+        user_exists = supabase.table("ielts_writing_bot_users").select("user_id").eq("user_id", user_id).execute()
+        if user_exists.data:
+            # Update existing user
+            supabase.table("ielts_writing_bot_users").update(data).eq("user_id", user_id).execute()
+        else:
+            # Insert new user
+            supabase.table("ielts_writing_bot_users").insert(data).execute()
+        print("user id get updated: ", user_id,"username: ",username, "time: ", formatted_time)
+    except Exception as e:
+        print("error while updating the user data: ", e)
 
 async def task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -215,6 +252,9 @@ def check_essay(essay):
     return True
 
 async def essay(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.message.from_user
+    user_id = user.id
+    username = user.username  # Retrieve the username
     essay_text = update.message.text
     print("Received essay from user")
 
@@ -277,6 +317,7 @@ async def essay(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"Grammar and Accuracy: \nscore: {evaluation_results['grammar_accuracy_score']}\n\n{evaluation_results['grammar_accuracy_text']}\n", parse_mode='Markdown')
 
         await update.message.reply_text(f"Overall Band Score:   {evaluation_results['overall_score']}", parse_mode='Markdown')
+        await update_user_data(user_id, username)  # Pass the username to the update function
 
         await update.message.reply_text("**Thank you for using IELTS Writing Evaluation Bot.\nIf you want a detailed feedback with more features, \n\nTry the website for free\n https://ielts-writing-ai.streamlit.app/**", parse_mode='Markdown')
 
@@ -296,7 +337,7 @@ async def essay(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     except Exception as e:
         print(f"An error occurred during evaluation: {e}")
-        await update.message.reply_text("An error occurred while evaluating your essay. Please try again later. \n if the problem persists, please contact me  @ielts_pathway\nYou can start again by clicking /start.", parse_mode='HTML')
+        await update.message.reply_text("An error occurred while evaluating your essay. Please try again later. \n if the problem persists, please contact me  @ielts_pathway\nYou can start again by clicking /start.\n or you can evaluate your essay via our website\n https://ielts-writing-ai.streamlit.app/", parse_mode='HTML')
         await update.message.reply_text("حدث خطأ أثناء تقييم مقالتك. يرجى المحاولة مرة أخرى لاحقًا .\n إذا استمرت المشكلة، يرجى التواصل معي @ielts_pathway.", parse_mode='HTML')
         return ESSAY
 
