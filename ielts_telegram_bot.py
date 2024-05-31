@@ -339,6 +339,7 @@ async def essay(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print(f"An error occurred during evaluation: {e}")
         await update.message.reply_text("An error occurred while evaluating your essay. Please try again later. \n if the problem persists, please contact me  @ielts_pathway\nYou can start again by clicking /start.\n or you can evaluate your essay via our website\n https://ielts-writing-ai.streamlit.app/", parse_mode='HTML')
         await update.message.reply_text("حدث خطأ أثناء تقييم مقالتك. يرجى المحاولة مرة أخرى لاحقًا .\n إذا استمرت المشكلة، يرجى التواصل معي @ielts_pathway.", parse_mode='HTML')
+        await update_user_data(user_id, username)
         return ESSAY
 
     return ConversationHandler.END
