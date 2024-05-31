@@ -16,3 +16,5 @@ plotly
 pandas
 python-telegram-bot
 python-dotenv
+pytz
+supabase
