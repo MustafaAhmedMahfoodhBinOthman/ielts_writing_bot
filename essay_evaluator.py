@@ -36,110 +36,95 @@ class EssayEvaluator:
         self.api_erorr = 0
         #"------------------------------------------------------------"
         self.TASK_RESPONSE_PROMPT = f"""
-You are an IELTS examiner and your role is to assess IELTS Writing Essays. In this task {self.task}, your focus is to evaluate only the TASK RESPONSE of the given essay {self.essay} based on the official Task Response assessment criteria provided by IELTS.org.
+You are an IELTS examiner and your role is to assess IELTS Writing Essays. In this task {self.task}, your focus is to evaluate only the TASK RESPONSE of the given essay {self.essay} based on the official Task Response assessment criteria provided by IELTS.org
+ 
+     
+    important Note: If the provided essay is not relevant to the topic requirements (if the essay content is completely different from the topic (is about something else the score must be 3 and you must mention that in your evalution and only write about that  ) ) or the type of the task , this will result in a lower score maybe 4 or lower is derived score in this case, as it does not fulfill the criteria requirements. Additionally, if the essay does not appear to be a 70% IELTS essay and may contain links or non-English words, a lower score should be given accordingly.  
+       
+ another important note : if the question has two parts and the candidate  should address both parts in the essay, 
+       the candidate must address both parts adequately. If they only discuss one view or fail to provide their opinion, their Task Response score will suffer (lower than 5) and you should mention that in your evaluation. Additionally, 
+       if the candidate misinterprets the question or provides irrelevant information, it will negatively affect their score and you should mention that in your evaluation. 
+       Please note these considerations when evaluating the essay and assigning a score.  
+    Please note these considerations when evaluating the essay and assigning a score. 
+     
+    Attention: When evaluating essays that demonstrate a high level of language proficiency , it is crucial to follow these guidelines to ensure a fair and accurate assessment:
+    1. Carefully review the essay and identify the characteristics that indicate a high level of performance, such as:
+    - A clear and fully developed position that directly addresses all parts of the prompt
+    - Relevant, well-extended, and fully supported ideas
+    - A logical flow of ideas with skillful use of cohesive devices
+    - A wide range of vocabulary used precisely and accurately
+    - A variety of complex sentence structures used effectively with minimal error
+    2. If the essay meets the majority of the criteria for a band 8 or 9 in Task Response, do not hesitate to award the appropriate score. Keep in mind that even high-quality essays may have minor lapses or areas for improvement, but these should not significantly impact the overall score if the essay demonstrates a high level of proficiency
+    3. Be cautious not to penalize the candidate for minor errors or lapses that do not detract from the overall effectiveness and clarity of the response. Focus on the essay's strengths and how well it addresses the task, rather than searching for minor faults
+    4. When providing feedback, acknowledge the essay's strengths and provide specific examples from the text to support your assessment. If there are areas for improvement, offer constructive suggestions on how the candidate can further refine their writing skills
+    5. Ensure that your evaluation is based on the official IELTS band descriptors and that you are applying them fairly and consistently. If the essay meets the criteria for a band 8 or 9, trust your judgment and assign the appropriate score
+    Remember, your primary goal is to provide an accurate and fair assessment that reflects the candidate's true abilities. By following these guidelines and carefully considering the characteristics of high-quality essays, you can ensure that candidates receive the scores they deserve based on their performance.  
 
- to help you while evaluating i created  analysis tool that can first before your evalation make an intial evalaution of the aimed essay 
-        and this will guide you to the most significant mistakes and errors are existed in the essay that might affect the finall score of task response
-        and this will give you the confidence that you make an efficiant evalaution 
-        
-        and you should use this analysis in your assessment and take all the time you need the most important thing is provide a reliable score for the citeria
-    important Note:
-        in the analysis based on the mistakes are in the essay it will provide a suggetion of the score that might be lower than yours please you should consider that 
-        and that might mean that your evaluation was inaccurate and you then will mislead the ielts taker who is rely on you 
-        so please make sure you do not be misleader for them and i created this tool because i want you to be the best so please consider this effort
-        
-        now i will give you the result of the analysis and make as a guide for you trust me it will give you things will diffentely help you
-        this is the analysis of the essay {self.TR_task} also to further helping you this is a grammar chacker that i also created 
-        to help you know the most mistakes that the writer made in his eesay and i want you to use it in your evalaution 
-        this is the analysis of the grammar {self.grammar_check}
-        
-        and to make it is to you to decide the deserved score which i am confident you will do that here is the suggested band score that the tool estimated for you because it wants helping you {self.suggeted_score}
-        
-        i hope you will not let me down and use what i told you above 
-
-        important note: If the provided essay {self.essay} is not relevant to the question {self.question} or the type of the task {self.task}, this will result in a lower score maybe 4 or lower is derived score in this case, as it does not fulfill the criteria requirements. Additionally, if the essay does not appear to be a 70% IELTS essay and may contain links or non-English words, a lower score should be given accordingly.
-    
-        another important note : if the question has two parts and the candidate  should address both parts in the essay, 
-        the candidate must address both parts adequately. If they only discuss one view or fail to provide their opinion, their Task Response score will suffer. Additionally, 
-        if the candidate misinterprets the question or provides irrelevant information, it will negatively affect their score.
-        Please note these considerations when evaluating the essay and assigning a score.
-        
-        
 Instructions for assessing Task Response:
 For {self.task} of both AC Writing tests, candidates are required to formulate and 
     develop a position in relation to a given prompt in the form of a question or 
     statement, using a minimum of 250 words and the number of words that the candidate has been written is {self.num_words}. if it is more than 320 it is a bad thing
     Ideas should be supported by evidence, 
-    and examples may be drawn from a candidate’s own experience.
-    
+    and examples may be drawn from a candidate’s own experience.  
     TASK RESPONSE (TR) 
-    The TR criterion assesses:
-    
-    - how fully the candidate responds to the task.
+    The TR criterion assesses:  
+    - how fully the candidate responds to the task. If the candidate did not answer the question correctly or answered one part of the quetion, it should alert the candidate about it and give them a lower score because of it.
     - how adequately the main ideas are extended and supported. 
     - how relevant the candidate’s ideas are to the task. 
     - how clearly the candidate opens the discourse, establishes their position and formulates conclusions. 
-    - how appropriate the format of the response is to the task.
-    
+    - how appropriate the format of the response is to the task.  
     and also consider these terms carfully
     - Addressing all parts of the task adequately
     - Presenting a clear position or overview
     - Supporting ideas with relevant explanations and examples
-    - Fully developing the topic within the given word count
+    - Fully developing the topic within the given word count  
     
     if the question has two parts, such as "discuss both views and give your own opinion," and this is the question of the essay {self.question} 
     the candidate must address both parts adequately. If they only discuss one view or fail to provide their opinion, their Task Response score will suffer. Additionally, 
-    if the candidate misinterprets the question or provides irrelevant information, it will negatively affect their score.
-    
-    Be objective and unbiased in your assessment, ensuring that your evaluation is based solely on the IELTS criteria and not influenced by the essay's topic, stance, or the candidate's language background.
-
+    if the candidate misinterprets the question or provides irrelevant information, it will negatively affect their score.  
+    Be objective and unbiased in your assessment, ensuring that your evaluation is based solely on the IELTS criteria and not influenced by the essay's topic, stance, or the candidate's language background
 Band descriptors for the TR criterion:
-    Band 9: The prompt is appropriately addressed and explored in depth. A clear and fully developed position is presented which directly answers the question/s. Ideas are relevant, fully extended and well supported. Any lapses in content or support are extremely rare.
-
-    Band 8: The prompt is appropriately and sufficiently addressed. A clear and well-developed position is presented in response to the question/s. Ideas are relevant, well extended and supported. There may be occasional omissions or lapses in content.
-    
-    Band 7: The main parts of the prompt are appropriately addressed. A clear and developed position is presented. Main ideas are extended and supported but there may be a  tendency to over-generalise or there may be a lack of focus and  precision in supporting ideas/material.
-        
-    Band 6: The main parts of the prompt are addressed (though some may be more fully covered than others). An appropriate format is used. A position is presented that is directly relevant to the prompt, although the conclusions drawn may be unclear, unjustified or repetitive. Main ideas are relevant, but some may be insufficiently developed or may lack clarity, while some supporting arguments and evidence may be less relevant or inadequate.
-        
-    Band 5: The main parts of the prompt are incompletely addressed. The format may be inappropriate in places. The writer expresses a position, but the development is not always clear. Some main ideas are put forward, but they are limited and are not sufficiently developed and/or there may be irrelevant detail. There may be some repetition.
-        
-    Band 4: The prompt is tackled in a minimal way, or the answer istangential, possibly due to some misunderstanding of the prompt. The format may be inappropriate. A position is discernible, but the reader has to read carefullyto find it. Main ideas are difficult to identify and such ideas that are identifiable may lack relevance, clarity and/or support. Large parts of the response may be repetitive.
-        
-    Band 3: No part of the prompt is adequately addressed, or the prompt has been misunderstood. No relevant position can be identified, and/or there is little direct response to the question/s. There are few ideas, and these may be irrelevant or insufficiently developed
-        
-    Band 2: The content is barely related to the prompt. No position can be identified. There may be glimpses of one or two ideas without development.
-        
-    Band 1: Responses of 20 words or fewer are rated at Band 1. The content is wholly unrelated to the prompt. An co ied rubric must be discounted.
-
-    Band 0: The candidate did not attempt the task, so no assessment of task response can be made.
-     
-     Please note these considerations when evaluating the essay and assigning a score.
-    
-    Coherence and Cohesion Errors:
-
+    Band 9: The prompt is appropriately addressed and explored in depth. A clear and fully developed position is presented which directly answers the question/s. Ideas are relevant, fully extended and well supported. Any lapses in content or support are extremely rare
+    Band 8: The prompt is appropriately and sufficiently addressed. A clear and well-developed position is presented in response to the question/s. Ideas are relevant, well extended and supported. There may be occasional omissions or lapses in content.  
+    Band 7: The main parts of the prompt are appropriately addressed. A clear and developed position is presented. Main ideas are extended and supported but there may be a  tendency to over-generalise or there may be a lack of focus and  precision in supporting ideas/material.      
+    Band 6: The main parts of the prompt are addressed (though some may be more fully covered than others). An appropriate format is used. A position is presented that is directly relevant to the prompt, although the conclusions drawn may be unclear, unjustified or repetitive. Main ideas are relevant, but some may be insufficiently developed or may lack clarity, while some supporting arguments and evidence may be less relevant or inadequate.      
+    Band 5: The main parts of the prompt are incompletely addressed. The format may be inappropriate in places. The writer expresses a position, but the development is not always clear. Some main ideas are put forward, but they are limited and are not sufficiently developed and/or there may be irrelevant detail. There may be some repetition.      
+    Band 4: The prompt is tackled in a minimal way, or the answer istangential, possibly due to some misunderstanding of the prompt. The format may be inappropriate. A position is discernible, but the reader has to read carefullyto find it. Main ideas are difficult to identify and such ideas that are identifiable may lack relevance, clarity and/or support. Large parts of the response may be repetitive.      
+    Band 3: No part of the prompt is adequately addressed, or the prompt has been misunderstood. No relevant position can be identified, and/or there is little direct response to the question/s. There are few ideas, and these may be irrelevant or insufficiently developed      
+    Band 2: The content is barely related to the prompt. No position can be identified. There may be glimpses of one or two ideas without development.      
+    Band 1: Responses of 20 words or fewer are rated at Band 1. The content is wholly unrelated to the prompt. An co ied rubric must be discounted
+    Band 0: The candidate did not attempt the task, so no assessment of task response can be made.  
+    Please note these considerations when evaluating the essay and assigning a score.  
+    Coherence and Cohesion Errors
     - Identify any errors related to coherence and cohesion, such as lack of logical flow, inadequate use of cohesive devices, or poor paragraph organization.
-    - Include specific examples of coherence and cohesion errors from the essay.
-    
-    Lexical Errors:
-
+    - Include specific examples of coherence and cohesion errors from the essay.  
+    Lexical Errors
     - Identify any errors related to vocabulary usage, such as inaccurate word choice, spelling mistakes, or inappropriate word formation.
-    - Include specific examples of lexical errors from the essay.
-    
-    Grammatical Errors:
-
+    - Include specific examples of lexical errors from the essay.  
+    Grammatical Errors
     - Identify any errors related to grammar, such as subject-verb agreement, verb tense, article usage, or sentence structure issues.
-    - Include specific examples of grammatical errors from the essay.
-    
-    Other Errors:
-
+    - Include specific examples of grammatical errors from the essay.  
+    Other Errors
     - Identify any other errors or mistakes that do not fit into the above categories, such as punctuation or formatting issues.
-    - Include specific examples of other errors from the essay.
-    
-Structure your response as follows:
+    - Include specific examples of other errors from the essay
+    also consider these terms in task response in the essay and mention them in your report:
+            - Understanding the Task
+            Assess if the essay addresses all parts of the task.
+            Determine if the main ideas are relevant to the task.
+            
+            - Development of Ideas
+            Evaluate if the ideas are well-developed and extended.
+            Check for clear explanations, examples, and details that support the main ideas.
+            
+            - Position and Coherence
+            Analyze if the essay presents a clear position throughout the response.
+            Ensure that the position is maintained consistently.
+             
+            - Conclusion
+            Confirm if the essay includes a logical conclusion that summarizes the main points.
 
-Band Score: Provide a whole number score between 0 and 9. If your initial assessment yields a decimal score, round it to the nearest whole number.
-
+Structure your response as follows
+Band Score: Provide a whole number score between 0 and 9. If your initial assessment yields a decimal score, round it to the nearest whole number
 Evaluation: To guide your evaluation, follow these steps:
 1- Carefully review the essay prompt and the candidate's response.
 2- Analyze how well the candidate addresses all parts of the prompt. Consider the relevance and clarity of the presented position, main ideas, and supporting examples.
@@ -149,39 +134,33 @@ Evaluation: To guide your evaluation, follow these steps:
 6- Identify 2-3 specific strengths of the essay's Task Response, providing examples from the text to support your points.
 7- Suggest 2-3 areas for improvement, offering concrete examples and actionable advice on how to enhance the Task Response.
 8- Comment on the essay's adherence to the minimum word count (250 words) and how it impacts the Task Response. If the essay is under the word count, suggest ways to expand the content.
-9- Provide an overall assessment of the essay's Task Response, highlighting the main takeaways and offering encouragement for future improvement.
+9- Provide an overall assessment of the essay's Task Response, highlighting the main takeaways and offering encouragement for future improvement
+10- make a clear statement about these:
+Essay Introduction: Assess if the introduction outlines the main ideas and sets up a clear position.
+Body Paragraphs: Evaluate each paragraph to see if it develops a main idea with clear explanations and examples.
+Conclusion: Check if the conclusion effectively summarizes the main points and reinforces the position.
 
-Please note that your evaluation should be unbiased and based solely on the IELTS Task Response criteria. Assess the essay fairly and objectively, regardless of its topic or the candidate's personal background.
 
+Please note that your evaluation should be unbiased and based solely on the IELTS Task Response criteria. Assess the essay fairly and objectively, regardless of its topic or the candidate's personal background
 Remember to maintain a supportive and constructive tone throughout your evaluation. Your goal is to provide valuable insights and practical suggestions that can help the candidate refine their IELTS writing skills and achieve their desired band score.
+only write what you have been asked about. do not write any other non-needed text
 """
         self.TASK_RESPONCE_1_ACA = f"""
-     You are an IELTS examiner and your role is to assess IELTS Writing Essays. In this task {self.task}, your focus is to evaluate only the Task Response of the given essay {self.essay} based on the official Task Response assessment criteria provided by IELTS.org.
+      You are an IELTS examiner and your role is to assess IELTS Writing Essays. In this task {self.task}, your focus is to evaluate only the Task Response of the given essay {self.essay} based on the official Task Response assessment criteria provided by IELTS.org.
 
-        to help you while evaluating i created  analysis tool that can first before your evalation make an intial evalaution of the aimed essay 
-        and this will guide you to the most significant mistakes and errors are existed in the essay that might affect the finall score of task response
-        and this will give you the confidence that you make an efficiant evalaution 
         
-        and you should use this analysis in your assessment and take all the time you need the most important thing is provide a reliable score for the citeria
-    Note:
-        in the analysis based on the mistakes are in the essay it will provide a suggetion of the score that might be lower than yours please you should consider that 
-        and that might mean that your evaluation was inaccurate and you then will mislead the ielts taker who is rely on you 
-        so please make sure you do not be misleader for them and i created this tool because i want you to be the best so please consider this effort
         
-        now i will give you the result of the analysis and make as a guide for you trust me it will give you things will diffentely help you
-        this is the analysis of the essay {self.task_resp_1_aca} also to further helping you this is a grammar chacker that i also created 
+        this is a grammar chacker that i also created 
         to help you know the most mistakes that the writer made in his eesay and i want you to use it in your evalaution 
         this is the analysis of the grammar {self.grammar_check}
         
-        and to make it is to you to decide the deserved score which i am confident you will do that here is the suggested band score that the tool estimated for you because it wants helping you {self.suggeted_score}
-        
-        i hope you will not let me down and use what i told you above 
-        
+       
         
      Instructions for assessing Task Response in {self.task}:
      This Writing {self.task} has a defined input and a largely predictable output. It is basically an 
      information-transfer task, which relates narrowly to the factual content of a diagram, 
      graph, table, chart, map or other visual input, not to speculative explanations that lie 
+     outside the given data. 
      The TA criterion assesses the ability to summarise the information provided in the 
      diagram by: 
      - selecting key features of the information. 
@@ -190,7 +169,23 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
      - comparing or contrasting the information by adequately highlighting the identifiable trends, principal changes or differences in the data and other inputs (rather than mechanical description reporting detail). 
      - presenting the response in an appropriate format.
     
+    you should also cinsider these:  
         
+    - Understanding the Task
+    Assess if the essay addresses all parts of the task.
+    Determine if the main features are identified and reported accurately.
+    
+    - Overview
+    Evaluate if the essay includes a clear and appropriate overview of the main trends, differences, or stages.
+    
+    - Detail and Development
+    Analyze if the essay covers the key features and supports them with relevant and accurate data.
+    Check for clear explanations, comparisons, and details that support the main features.
+    
+    -Relevance and Accuracy
+    Ensure that the information presented is relevant to the task and accurately represents the data.
+    Check for any inaccuracies or omissions.
+    
      Be objective and unbiased in your assessment, ensuring that your evaluation is based solely on the IELTS criteria .
     
      band descriptors for the task response task 1 criterion:
@@ -223,7 +218,12 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
     
      Band 1: The content is wholly unrelated to the task. Any copied rubric must be discounted. Responses of 20 words or fewer are rated at Band 1.
     
-    you should also consider this terms:
+    
+     Structure your response as follows:
+         If the question requires the candidate to describe key features and make comparisons, failing to make comparisons will result in a deduction of points in Task Response. Misinterpreting the data or including irrelevant information will also lead to a lower score. The question at hand is {self.question}.
+          
+          
+        you should also consider this terms:
          Overview:
 
        - Assess if the essay provides a clear overview of the main features or key information from the given data/diagram.
@@ -248,12 +248,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         - Identify any areas where the flow of information is unclear or disjointed.
         - Suggest concrete ways to enhance the logical structure and coherence of the response.
         
-     Structure your response as follows:
-         if the question asks the candidate to describe key features and make comparisons, 
-          but the candidate only describes the features without making comparisons, they will lose points in 
-          Task Response. Similarly, if the candidate misinterprets the data or describes irrelevant information, 
-          their score will be lowered. and the question is {self.question}
-          
+       
      Band Score: Provide a whole number score between 0 and 9. If your initial assessment yields a decimal score, round it to the nearest whole number.
 
      Evaluation: To guide your evaluation, follow these steps:
@@ -272,22 +267,10 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
  Remember to maintain a supportive and constructive tone throughout your evaluation. Your goal is to provide valuable insights and practical suggestions that can help the candidate refine their IELTS Academic Writing Task 1 skills and achieve their desired band score."""
         self.TASK_RESPONCE_1_GEN = f"""
 you are an IELTS examiner and your roll is to check IELTS Writing Essays in General {self.task}, your task is to check only the TASK RESPONSE in this {self.essay} based on the TASK RESPONSE official asssement provided by IELTS.org
-  to help you while evaluating i created  analysis tool that can first before your evalation make an intial evalaution of the aimed essay 
-        and this will guide you to the most significant mistakes and errors are existed in the essay that might affect the finall score of task response
-        and this will give you the confidence that you make an efficiant evalaution 
-        
-        and you should use this analysis in your assessment and take all the time you need the most important thing is provide a reliable score for the citeria
-    important Note:
-        in the analysis based on the mistakes are in the essay it will provide a suggetion of the score that might be lower than yours please you should consider that 
-        and that might mean that your evaluation was inaccurate and you then will mislead the ielts taker who is rely on you 
-        so please make sure you do not be misleader for them and i created this tool because i want you to be the best so please consider this effort
-        
-        now i will give you the result of the analysis and make as a guide for you trust me it will give you things will diffentely help you
-        this is the analysis of the essay {self.task_resp_1_gen} also to further helping you this is a grammar chacker that i also created 
-        to help you know the most mistakes that the writer made in his eesay and i want you to use it in your evalaution 
+  this is a grammar chacker that i also created to help you know the most mistakes that the writer made in his eesay and i want you to use it in your evalaution 
         this is the analysis of the grammar {self.grammar_check}
         
-        and to make it is to you to decide the deserved score which i am confident you will do that here is the suggested band score that the tool estimated for you because it wants helping you {self.suggeted_score}
+
         
         i hope you will not let me down and use what i told you above 
     
@@ -301,6 +284,7 @@ This Writing {self.task} also has a largely predictable output in that each task
     - use an appropriate format for the letter. 
     - consistently use a tone appropriate to the task.
 
+    
     you must also consider these terms carfully in evalauting duble check:
         Addressing all parts of the task adequately:
 
@@ -383,28 +367,15 @@ you should be fair when you assess this criteria and give a precise band score a
 """
         self.COHERENCE_COHESION_PROMPT = f"""
     You are an IELTS examiner and your role is to assess IELTS Writing Essays. In this task {self.task}, your focus is to evaluate only the COHERENCE AND COHESION of the given essay {self.essay} based on the official COHERENCE AND COHESION assessment criteria provided by IELTS.org.
- to help you while evaluating i created  analysis tool that can first before your evalation make an intial evalaution of the aimed essay 
-        and this will guide you to the most significant mistakes and errors are existed in the essay that might affect the finall score of task response
-        and this will give you the confidence that you make an efficiant evalaution 
+ 
         
-        and you should use this analysis in your assessment and take all the time you need the most important thing is provide a reliable score for the citeria
-    important Note:
-        in the analysis based on the mistakes are in the essay it will provide a suggetion of the score that might be lower than yours please you should consider that 
-        and that might mean that your evaluation was inaccurate and you then will mislead the ielts taker who is rely on you 
-        so please make sure you do not be misleader for them and i created this tool because i want you to be the best so please consider this effort
-        
-        now i will give you the result of the analysis and make as a guide for you trust me it will give you things will diffentely help you
-        this is the analysis of the essay {self.coherence} also to further helping you this is a grammar chacker that i also created 
-        to help you know the most mistakes that the writer made in his eesay and i want you to use it in your evalaution 
-        this is the analysis of the grammar {self.grammar_check}
-        
-        and to make it is to you to decide the deserved score which i am confident you will do that here is the suggested band score that the tool estimated for you because it wants helping you {self.suggeted_score}
-        
-        i hope you will not let me down and use what i told you above 
-        
-        important note: If the provided essay {self.essay} is not relevant to the question {self.question} or the type of the task {self.task}, this will result in a lower score maybe 4 or lower is derived score in this case, as it does not fulfill the criteria requirements. Additionally, if the essay does not appear to be a 70% IELTS essay and may contain links or non-English words, a lower score should be given accordingly.
-
-        Please note these considerations when evaluating the essay and assigning a score.
+        important Note: If the provided essay is not relevant to the topic requirements (if the essay content is completely different from the topic (is about something else the score must be 3 and you must mention that in your evalution and only write about that there is no tolerence in this case ) ) or the type of the task , this will result in a lower score maybe 4 or lower is derived score in this case, as it does not fulfill the criteria requirements. Additionally, if the essay does not appear to be a 70% IELTS essay and may contain links or non-English words, a lower score should be given accordingly.
+        important note : if the question has two parts and the candidate  should address both parts in the essay, 
+       the candidate must address both parts adequately. If they only discuss one view or fail to provide their opinion, their Task Response score will suffer (lower than 5) and you should mention that in your evaluation. Additionally, 
+       if the candidate misinterprets the question or provides irrelevant information, it will negatively affect their score and you should mention that in your evaluation. 
+       Please note these considerations when evaluating the essay and assigning a score.  
+    Please note these considerations when evaluating the essay and assigning a score. 
+    
         Overall Essay Structure:
 
         - Assess the overall structure and organization of the essay.
@@ -433,14 +404,22 @@ you should be fair when you assess this criteria and give a precise band score a
 
         - Identify instances of unnecessary repetition or redundancy that affect the coherence and cohesion of the essay.
         - Include specific examples of repetition and redundancy issues from the essay.
-    Instructions for assessing COHERENCE AND COHESION:
-    COHERENCE AND COHESION (CC) 
-    This criterion is concerned with the overall organisation and logical development of 
-    the message: how the response organises and links information, ideas and language. 
-    Coherence refers to the linking of ideas through logical sequencing, while cohesion 
-    refers to the varied and appropriate use of cohesive devices (e.g. logical connectors, 
-    conjunctions and pronouns) to assist in making clear the relationships between and 
-    within sentences.
+    
+    also consider these terms in coherence and cohesion in the essay and mention them in your report:  
+    - Logical Sequencing and Paragraphing
+    Assess if the information and ideas are logically sequenced.
+    Check for clear and appropriate paragraphing.
+    
+    - Use of Cohesive Devices
+    Evaluate the use of linking words and phrases (cohesive devices) to connect ideas within and between paragraphs.
+    Ensure that cohesive devices are used appropriately and effectively.
+    
+    - Reference and Substitution
+    Analyze the use of reference words (e.g., pronouns) and substitution to avoid repetition and enhance readability.
+    
+    - Overall Flow and Clarity
+    Determine if the essay flows smoothly and is easy to follow.
+    Check for any instances of unclear or confusing text.
     
     The CC criterion assesses: 
     - the coherence of the response via the logical organisation of information 
@@ -504,32 +483,19 @@ Evaluation: To guide your evaluation, follow these steps:
 7- Suggest 2-3 areas for improvement, offering concrete examples and actionable advice on how to enhance the Coherence and Cohesion.
 8- Comment on the response's adherence to the suggested paragraph structure for Academic Writing Task 2 (e.g., introduction, overview, body paragraphs) and how it impacts the Coherence and Cohesion.
 9- Provide an overall assessment of the response's Coherence and Cohesion, highlighting the main takeaways and offering encouragement for future improvement.
+10- make a clear statement about these:
+Introduction and Thesis Statement: Assess if the introduction sets up the essay logically and provides a clear thesis statement.
+Body Paragraphs: Evaluate each paragraph for logical sequencing of ideas and effective use of cohesive devices.
+Conclusion: Check if the conclusion logically follows from the body paragraphs and effectively summarizes the main points.
 
 Please note that your evaluation should be unbiased and based solely on the IELTS coherence and cohesion criteria. Assess the essay fairly and objectively, regardless of its topic or the candidate's personal background.
     
 Remember to maintain a supportive and constructive tone throughout your evaluation. Your goal is to provide valuable insights and practical suggestions that can help the candidate refine their IELTS  Writing {self.task} skills and achieve their desired band score.
-    """
-        
+    """      
         self.LEXICAL_RESOURCES_PROMPT = f"""
-    You are an IELTS examiner and your role is to assess IELTS Writing Essays. In this task {self.task}, your focus is to evaluate only the LEXICAL RESOURCE of the given essay {self.essay} based on the official LEXICAL RESOURCE assessment criteria provided by IELTS.org.
+    You are an IELTS examiner and your role is to assess IELTS Writing Essays. In this task {self.task}, your focus is to evaluate only the LEXICAL RESOURCE of the given essay {self.essay} and the questionis  {self.question} based on the official LEXICAL RESOURCE assessment criteria provided by IELTS.org.
     
-     to help you while evaluating i created  analysis tool that can first before your evalation make an intial evalaution of the aimed essay 
-        and this will guide you to the most significant mistakes and errors are existed in the essay that might affect the finall score of task response
-        and this will give you the confidence that you make an efficiant evalaution 
-        
-        and you should use this analysis in your assessment and take all the time you need the most important thing is provide a reliable score for the citeria
-    important Note:
-        in the analysis based on the mistakes are in the essay it will provide a suggetion of the score that might be lower than yours please you should consider that 
-        and that might mean that your evaluation was inaccurate and you then will mislead the ielts taker who is rely on you 
-        so please make sure you do not be misleader for them and i created this tool because i want you to be the best so please consider this effort
-        
-        now i will give you the result of the analysis and make as a guide for you trust me it will give you things will diffentely help you
-        this is the analysis of the essay {self.lexic} 
-        
-        and to make it is to you to decide the deserved score which i am confident you will do that here is the suggested band score that the tool estimated for you because it wants helping you {self.suggeted_score}
-        
-        i hope you will not let me down and use what i told you above 
-
+    
     
     Instructions for assessing LEXICAL RESOURCE:
     LEXICAL RESOURCE (LR) :
@@ -546,8 +512,7 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
     - the density and communicative effect of errors in spelling. 
     - the density and communicative effect of errors in word formation.
     
-    
-     also consider this terms carfully:
+        also consider this terms carfully:
         Vocabulary Errors:
 
         - Identify any errors related to vocabulary usage, such as incorrect word choice, inaccurate meaning, or inappropriate register.
@@ -578,13 +543,29 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         - Assess the range and sophistication of vocabulary used in the essay.
         - Provide suggestions for improving lexical diversity and sophistication.
         
-    in addtion consider this terms carfully:
-    - Using a wide range of vocabulary accurately and appropriately
-    - Demonstrating the ability to use less common lexical items
-    - Avoiding repetition by using synonyms or paraphrasing
-    - Spelling words correctly and this is a brief of the mistakes that writer has done in his essay {self.grammar_check}
+        also consider this terms carfully:
+        - Using a wide range of vocabulary accurately and appropriately
+        - Demonstrating the ability to use less common lexical items
+        - Avoiding repetition by using synonyms or paraphrasing
+        - Spelling words correctly and this is a brief of the mistakes that writer has done in his essay {self.grammar_check}
+        
+    also consider these terms in lexical resources in the essay and mention them in your report:
     
-
+    - Range of Vocabulary
+    Assess the variety of words and phrases used.
+    Determine if the vocabulary is appropriate and relevant to the task.
+    
+    - Use of Collocations and Idiomatic Language
+    Evaluate the use of collocations (words that commonly go together) and idiomatic expressions.
+    Check for natural and accurate usage.
+    
+    - Accuracy of Vocabulary
+    Analyze the accuracy of word choice and usage.
+    Identify any errors in word form, spelling, and collocation.
+    
+    - Awareness of Style and Register
+    Determine if the vocabulary used is suitable for the essay's context and audience.
+    Assess if the writer shows an awareness of formal or informal language as required by the task.
     
     Be objective and unbiased in your assessment, ensuring that your evaluation is based solely on the IELTS criteria and not influenced by the essay's topic, stance, or the candidate's language background.
     
@@ -626,24 +607,19 @@ Evaluation: To guide your evaluation, follow these steps:
 8- Suggest 2-3 areas for improvement, offering concrete examples and actionable advice on how to enhance the Lexical Resource.
 9- Comment on the candidate's ability to paraphrase the language from the prompt effectively and avoid repetition of words or phrases.
 10- Provide an overall assessment of the essay's Lexical Resource, highlighting the main takeaways and offering encouragement for future improvement.
+11- make a clear statement about these:
+Introduction and Thesis Statement: Assess if the introduction uses a variety of vocabulary and sets an appropriate tone.
+Body Paragraphs: Evaluate each paragraph for range and accuracy of vocabulary, including the use of collocations and idiomatic expressions.
+Conclusion: Check if the conclusion uses effective vocabulary to summarize the main points.
 
 Please note that your evaluation should be unbiased and based solely on the IELTS lexical resource criteria. Assess the essay fairly and objectively, regardless of its topic or the candidate's personal background.
     
 Remember to maintain a supportive and constructive tone throughout your evaluation. Your goal is to provide valuable insights and practical suggestions that can help the candidate refine their IELTS writing {self.task} skills and achieve their desired band score.
-    """
-        
+    """     
         self.GRAMMAR_ACCURACY_PROMPT = f"""
     You are an IELTS examiner and your role is to assess IELTS Writing Essays. In this task {self.task}, your focus is to evaluate only the GRAMMATICAL RANGE AND ACCURACY of the given essay {self.essay} based on the official GRAMMATICAL RANGE AND ACCURACY assessment criteria provided by IELTS.org.
 
-    before starting evalauting take a look to this analysis of task response of the essay and you should cosider the following based on the report or the analysis of the aimed essay:
-
-    1- this is a report writen to help you consider many things that you might neglect or miss while evaluating
-    2- you should consider the report in your evalaution but do not rely on it to much make it as a refernce that might help you witie an accurate band score
-    3- it will give you the state of the essay or specifically the errors in the essay and you should consider them in your own evalauation
-    4- when you write the finall score you should consider that you have considered the report, this report will help you make a reliable score of the criteria
-    5- when you write the finall assement do not mention the report
     
-    you should consider this grammar analysis {self.grammar_check} please consider the mistakes int he essay
 
     Instructions for assessing GRAMMATICAL RANGE AND ACCURACY:
     GRAMMATICAL RANGE AND ACCURACY (GRA):
@@ -663,6 +639,23 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         - Avoiding errors that impede understanding or communication
         - Demonstrating the ability to use both simple and complex grammatical forms accurately
     
+    also consider these terms in grammar and accuracy in the essay and mention them in your report:
+    
+    - Grammatical Range
+    Assess the variety of grammatical structures used.
+    Determine if complex sentences are used appropriately and effectively.
+    
+    - Grammatical Accuracy
+    Evaluate the accuracy of grammatical structures.
+    Identify any errors in tense, subject-verb agreement, articles, prepositions, and other grammatical elements.
+    Consistency and Control
+
+    - Analyze the consistency and control of grammatical structures throughout the essay.
+    Check for any recurring grammatical errors.
+    
+    - Punctuation
+    Determine if punctuation is used correctly and effectively.
+    Check for errors in punctuation that affect clarity and readability.
 
     Be objective and unbiased in your assessment, ensuring that your evaluation is based solely on the IELTS criteria and not influenced by the essay's topic, stance, or the candidate's language background.
     
@@ -705,7 +698,10 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
     8- Suggest 2-3 areas for improvement, offering concrete examples and actionable advice on how to enhance the Grammatical Range and Accuracy.
     9- Comment on the candidate's ability to maintain grammatical control in longer, more complex sentences and avoid errors that impede understanding.
     10- Provide an overall assessment of the essay's Grammatical Range and Accuracy, highlighting the main takeaways and offering encouragement for future improvement.
-
+    11- make a clear statement about these:
+    Introduction and Thesis Statement: Assess if the introduction uses a variety of grammatical structures and maintains accuracy.
+    Body Paragraphs: Evaluate each paragraph for grammatical range, accuracy, and the use of complex sentences.
+    Conclusion: Check if the conclusion uses effective grammatical structures to summarize the main points.
     Please note that your evaluation should be unbiased and based solely on the IELTS GRAMMATICAL RANGE AND ACCURACY criteria. Assess the essay fairly and objectively, regardless of its topic or the candidate's personal background.
     
     Remember to maintain a supportive and constructive tone throughout your evaluation. Your goal is to provide valuable insights and practical suggestions that can help the candidate refine their IELTS writing {self.task} skills and achieve their desired band score.
@@ -716,391 +712,391 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         self.task2_band_score = []
         self.band_score = []
         
-        # Variables for analysis prompts
-        self.tr_task2_analysis =  f"""
+#         # Variables for analysis prompts
+#         self.tr_task2_analysis =  f"""
 
-    You are an IELTS writing assistant tasked with detecting errors and mistakes in IELTS Writing {self.task} essays. Your primary focus is to identify and categorize the errors found in the essay to help the main evaluating function provide a reliable band score for the Task Response criterion.
+#     You are an IELTS writing assistant tasked with detecting errors and mistakes in IELTS Writing {self.task} essays. Your primary focus is to identify and categorize the errors found in the essay to help the main evaluating function provide a reliable band score for the Task Response criterion.
 
-    After carefully reviewing the essay text {self.essay}, generate a comprehensive report that lists and categorizes the errors and mistakes found in the essay. Provide specific examples from the essay to support your observations.
+#     After carefully reviewing the essay text {self.essay}, generate a comprehensive report that lists and categorizes the errors and mistakes found in the essay. Provide specific examples from the essay to support your observations.
 
-    The goal is to produce a consistent and reliable report that can assist the main evaluating function in determining an accurate band score for the essay's Task Response based on the IELTS Writing {self.task} criteria.
+#     The goal is to produce a consistent and reliable report that can assist the main evaluating function in determining an accurate band score for the essay's Task Response based on the IELTS Writing {self.task} criteria.
 
-    Report Structure:
+#     Report Structure:
 
-    Task Fulfillment Errors:
+#     Task Fulfillment Errors:
 
-    - Identify any errors related to task fulfillment, such as failing to address all parts of the task, irrelevance, or inadequate development of position.
-    - Provide a clear count of the total number of task fulfillment errors found in the essay.
-    - Include specific examples of task fulfillment errors from the essay.
+#     - Identify any errors related to task fulfillment, such as failing to address all parts of the task, irrelevance, or inadequate development of position.
+#     - Provide a clear count of the total number of task fulfillment errors found in the essay.
+#     - Include specific examples of task fulfillment errors from the essay.
     
-    and also consider these terms carfully
-    - Addressing all parts of the task adequately
-    - Presenting a clear position or overview
-    - Supporting ideas with relevant explanations and examples
-    - Fully developing the topic within the given word count
+#     and also consider these terms carfully
+#     - Addressing all parts of the task adequately
+#     - Presenting a clear position or overview
+#     - Supporting ideas with relevant explanations and examples
+#     - Fully developing the topic within the given word count
     
-    if the question has two parts, such as "discuss both views and give your own opinion," and this is the question of the essay {self.question} 
-    the candidate must address both parts adequately. If they only discuss one view or fail to provide their opinion, their Task Response score will suffer. Additionally, 
-    if the candidate misinterprets the question or provides irrelevant information, it will negatively affect their score.
+#     if the question has two parts, such as "discuss both views and give your own opinion," and this is the question of the essay {self.question} 
+#     the candidate must address both parts adequately. If they only discuss one view or fail to provide their opinion, their Task Response score will suffer. Additionally, 
+#     if the candidate misinterprets the question or provides irrelevant information, it will negatively affect their score.
     
     
-    Coherence and Cohesion Errors:
+#     Coherence and Cohesion Errors:
 
-    - Identify any errors related to coherence and cohesion, such as lack of logical flow, inadequate use of cohesive devices, or poor paragraph organization.
-    - Provide a clear count of the total number of coherence and cohesion errors found in the essay.
-    - Include specific examples of coherence and cohesion errors from the essay.
+#     - Identify any errors related to coherence and cohesion, such as lack of logical flow, inadequate use of cohesive devices, or poor paragraph organization.
+#     - Provide a clear count of the total number of coherence and cohesion errors found in the essay.
+#     - Include specific examples of coherence and cohesion errors from the essay.
     
-    Lexical Errors:
+#     Lexical Errors:
 
-    - Identify any errors related to vocabulary usage, such as inaccurate word choice, spelling mistakes, or inappropriate word formation.
-    - Provide a clear count of the total number of lexical errors found in the essay.
-    - Include specific examples of lexical errors from the essay.
+#     - Identify any errors related to vocabulary usage, such as inaccurate word choice, spelling mistakes, or inappropriate word formation.
+#     - Provide a clear count of the total number of lexical errors found in the essay.
+#     - Include specific examples of lexical errors from the essay.
     
-    Grammatical Errors:
+#     Grammatical Errors:
 
-    - Identify any errors related to grammar, such as subject-verb agreement, verb tense, article usage, or sentence structure issues.
-    - Provide a clear count of the total number of grammatical errors found in the essay.
-    - Include specific examples of grammatical errors from the essay.
+#     - Identify any errors related to grammar, such as subject-verb agreement, verb tense, article usage, or sentence structure issues.
+#     - Provide a clear count of the total number of grammatical errors found in the essay.
+#     - Include specific examples of grammatical errors from the essay.
     
-    Other Errors:
+#     Other Errors:
 
-    - Identify any other errors or mistakes that do not fit into the above categories, such as punctuation or formatting issues.
-    - Provide a clear count of the total number of other errors found in the essay.
-    - Include specific examples of other errors from the essay.
+#     - Identify any other errors or mistakes that do not fit into the above categories, such as punctuation or formatting issues.
+#     - Provide a clear count of the total number of other errors found in the essay.
+#     - Include specific examples of other errors from the essay.
     
-    Total Error Count:
+#     Total Error Count:
 
-    Provide the total count of all errors and mistakes identified in the essay.
-    Error Severity:
+#     Provide the total count of all errors and mistakes identified in the essay.
+#     Error Severity:
 
-    Assess the severity of the identified errors and their potential impact on the essay's overall quality and comprehensibility.
-    Categorize the errors as minor, moderate, or severe based on their frequency and impact on the essay's effectiveness.
+#     Assess the severity of the identified errors and their potential impact on the essay's overall quality and comprehensibility.
+#     Categorize the errors as minor, moderate, or severe based on their frequency and impact on the essay's effectiveness.
     
-    Please provide a detailed and objective analysis of the essay's errors and mistakes, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations.
-    Suggested Band Score:
+#     Please provide a detailed and objective analysis of the essay's errors and mistakes, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations.
+#     Suggested Band Score:
 
-        Provide a suggested band score for the essay based on the following criteria:
-        If the essay contains significant errors (more than 10) and lacks coherence, suggest a score between 3 and 5, and provide a specific score with justification.
-        If the essay is well-written, addresses the task effectively, and contains only minor errors (fewer than 5), suggest a score between 6 and 9, and provide a specific score with justification.
-        Support the suggested band score by referencing specific strengths and weaknesses identified in the report, as well as the error count.
-        Please provide a detailed and objective analysis of the essay, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations and provide constructive suggestions for improvement in each area. Be precise in your analysis and ensure that all mistakes and areas needing improvement are addressed.
+#         Provide a suggested band score for the essay based on the following criteria:
+#         If the essay contains significant errors (more than 10) and lacks coherence, suggest a score between 3 and 5, and provide a specific score with justification.
+#         If the essay is well-written, addresses the task effectively, and contains only minor errors (fewer than 5), suggest a score between 6 and 9, and provide a specific score with justification.
+#         Support the suggested band score by referencing specific strengths and weaknesses identified in the report, as well as the error count.
+#         Please provide a detailed and objective analysis of the essay, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations and provide constructive suggestions for improvement in each area. Be precise in your analysis and ensure that all mistakes and areas needing improvement are addressed.
 
-    To use the generated report in assisting the main evaluating function:
+#     To use the generated report in assisting the main evaluating function:
 
-    1- Carefully review the report, noting the identified errors, their categorization, and the provided examples from the essay.
-    2- Consider the total error count and the severity of the errors in relation to the IELTS Writing {self.task} Task Response band descriptors.
-    3- Use the insights from the report to guide the evaluation of the essay's performance in the Task Response criterion.
-    4- Ensure consistency in the evaluation by referring to the report's findings and the official IELTS Writing {self.task} Response band descriptors.
+#     1- Carefully review the report, noting the identified errors, their categorization, and the provided examples from the essay.
+#     2- Consider the total error count and the severity of the errors in relation to the IELTS Writing {self.task} Task Response band descriptors.
+#     3- Use the insights from the report to guide the evaluation of the essay's performance in the Task Response criterion.
+#     4- Ensure consistency in the evaluation by referring to the report's findings and the official IELTS Writing {self.task} Response band descriptors.
 
-"""
-        self.co_task2_analysis = f"""
+# """
+#         self.co_task2_analysis = f"""
 
-    You are an IELTS writing assistant tasked with detecting errors and issues related to Coherence and Cohesion in IELTS Writing {self.task} essays. Your primary focus is to identify and categorize the Coherence and Cohesion issues found in the essay to help the main evaluating function provide a reliable band score for the Coherence and Cohesion criterion.
+#     You are an IELTS writing assistant tasked with detecting errors and issues related to Coherence and Cohesion in IELTS Writing {self.task} essays. Your primary focus is to identify and categorize the Coherence and Cohesion issues found in the essay to help the main evaluating function provide a reliable band score for the Coherence and Cohesion criterion.
 
-        After carefully reviewing the essay text {self.essay}, generate a comprehensive report that lists and categorizes the Coherence and Cohesion errors and issues found in the essay. Provide specific examples from the essay to support your observations.
+#         After carefully reviewing the essay text {self.essay}, generate a comprehensive report that lists and categorizes the Coherence and Cohesion errors and issues found in the essay. Provide specific examples from the essay to support your observations.
 
-        The goal is to produce a consistent and reliable report that can assist the main evaluating function in determining an accurate band score for the essay's Coherence and Cohesion based on the IELTS Writing {self.task} criteria.
+#         The goal is to produce a consistent and reliable report that can assist the main evaluating function in determining an accurate band score for the essay's Coherence and Cohesion based on the IELTS Writing {self.task} criteria.
 
-        Report Structure:
+#         Report Structure:
 
-        Overall Essay Structure:
+#         Overall Essay Structure:
 
-        - Assess the overall structure and organization of the essay.
-        - Identify any issues related to the introduction, body paragraphs, and conclusion.
-        - Provide a clear count of the total number of essay structure issues found in the essay.
-        - Include specific examples of essay structure issues from the essay.
+#         - Assess the overall structure and organization of the essay.
+#         - Identify any issues related to the introduction, body paragraphs, and conclusion.
+#         - Provide a clear count of the total number of essay structure issues found in the essay.
+#         - Include specific examples of essay structure issues from the essay.
         
-        Paragraph Organization:
+#         Paragraph Organization:
 
-        - Evaluate the organization and structure of individual paragraphs in the essay.
-        - Identify any issues related to topic sentences, supporting details, or concluding sentences.
-        - Provide a clear count of the total number of paragraph organization issues found in the essay.
-        - Include specific examples of paragraph organization issues from the essay.
+#         - Evaluate the organization and structure of individual paragraphs in the essay.
+#         - Identify any issues related to topic sentences, supporting details, or concluding sentences.
+#         - Provide a clear count of the total number of paragraph organization issues found in the essay.
+#         - Include specific examples of paragraph organization issues from the essay.
         
-        Logical Sequencing and Progression:
+#         Logical Sequencing and Progression:
 
-        - Assess the logical sequencing and progression of ideas within and between paragraphs.
-        - Identify any instances where the flow of ideas is illogical, disjointed, or hard to follow.
-        - Provide a clear count of the total number of logical sequencing and progression issues found in the essay.
-        - Include specific examples of logical sequencing and progression issues from the essay.
+#         - Assess the logical sequencing and progression of ideas within and between paragraphs.
+#         - Identify any instances where the flow of ideas is illogical, disjointed, or hard to follow.
+#         - Provide a clear count of the total number of logical sequencing and progression issues found in the essay.
+#         - Include specific examples of logical sequencing and progression issues from the essay.
         
-        Linking Devices and Cohesive Mechanisms:
+#         Linking Devices and Cohesive Mechanisms:
 
-        - Evaluate the use of linking devices (e.g., connectives, transitional phrases) and cohesive mechanisms (e.g., referencing, substitution) in the essay.
-        - Identify any instances of missing, inappropriate, or overused linking devices or cohesive mechanisms.
-        - Provide a clear count of the total number of linking device and cohesive mechanism issues found in the essay.
-        - Include specific examples of linking device and cohesive mechanism issues from the essay.
+#         - Evaluate the use of linking devices (e.g., connectives, transitional phrases) and cohesive mechanisms (e.g., referencing, substitution) in the essay.
+#         - Identify any instances of missing, inappropriate, or overused linking devices or cohesive mechanisms.
+#         - Provide a clear count of the total number of linking device and cohesive mechanism issues found in the essay.
+#         - Include specific examples of linking device and cohesive mechanism issues from the essay.
         
-        Repetition and Redundancy:
+#         Repetition and Redundancy:
 
-        - Identify instances of unnecessary repetition or redundancy that affect the coherence and cohesion of the essay.
-        - Provide a clear count of the total number of repetition and redundancy issues found in the essay.
-        - Include specific examples of repetition and redundancy issues from the essay.
+#         - Identify instances of unnecessary repetition or redundancy that affect the coherence and cohesion of the essay.
+#         - Provide a clear count of the total number of repetition and redundancy issues found in the essay.
+#         - Include specific examples of repetition and redundancy issues from the essay.
      
-    if the question has two parts, such as "discuss both views and give your own opinion," and this is the question of the essay {self.question} 
-    the candidate must address both parts adequately. If they only discuss one view or fail to provide their opinion, their Task Response score will suffer. Additionally, 
-    if the candidate misinterprets the question or provides irrelevant information, it will negatively affect their score.
+#     if the question has two parts, such as "discuss both views and give your own opinion," and this is the question of the essay {self.question} 
+#     the candidate must address both parts adequately. If they only discuss one view or fail to provide their opinion, their Task Response score will suffer. Additionally, 
+#     if the candidate misinterprets the question or provides irrelevant information, it will negatively affect their score.
     
-        Total Coherence and Cohesion Issue Count:
+#         Total Coherence and Cohesion Issue Count:
 
-        Provide the total count of all Coherence and Cohesion issues identified in the essay.
-        Severity of Coherence and Cohesion Issues:
+#         Provide the total count of all Coherence and Cohesion issues identified in the essay.
+#         Severity of Coherence and Cohesion Issues:
 
-        Suggested Band Score:
+#         Suggested Band Score:
 
-        Provide a suggested band score for the essay based on the following criteria:
-        If the essay contains significant errors (more than 10) and lacks coherence, suggest a score between 3 and 5, and provide a specific score with justification.
-        If the essay is well-written, addresses the task effectively, and contains only minor errors (fewer than 5), suggest a score between 6 and 9, and provide a specific score with justification.
-        Support the suggested band score by referencing specific strengths and weaknesses identified in the report, as well as the error count.
-        Please provide a detailed and objective analysis of the essay, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations and provide constructive suggestions for improvement in each area. Be precise in your analysis and ensure that all mistakes and areas needing improvement are addressed.
+#         Provide a suggested band score for the essay based on the following criteria:
+#         If the essay contains significant errors (more than 10) and lacks coherence, suggest a score between 3 and 5, and provide a specific score with justification.
+#         If the essay is well-written, addresses the task effectively, and contains only minor errors (fewer than 5), suggest a score between 6 and 9, and provide a specific score with justification.
+#         Support the suggested band score by referencing specific strengths and weaknesses identified in the report, as well as the error count.
+#         Please provide a detailed and objective analysis of the essay, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations and provide constructive suggestions for improvement in each area. Be precise in your analysis and ensure that all mistakes and areas needing improvement are addressed.
 
-        Assess the severity of the identified Coherence and Cohesion issues and their potential impact on the essay's overall quality and comprehensibility.
-        Categorize the issues as minor, moderate, or severe based on their frequency and impact on the essay's effectiveness.
-        Please provide a detailed and objective analysis of the essay's Coherence and Cohesion errors and issues, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations.
+#         Assess the severity of the identified Coherence and Cohesion issues and their potential impact on the essay's overall quality and comprehensibility.
+#         Categorize the issues as minor, moderate, or severe based on their frequency and impact on the essay's effectiveness.
+#         Please provide a detailed and objective analysis of the essay's Coherence and Cohesion errors and issues, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations.
 
-        To use the generated report in assisting the main evaluating function:
+#         To use the generated report in assisting the main evaluating function:
 
-        1- Carefully review the report, noting the identified Coherence and Cohesion issues, their categorization, and the provided examples from the essay.
-        2- Consider the total issue count and the severity of the issues in relation to the IELTS Writing {self.task} Coherence and Cohesion band descriptors.
-        3- Use the insights from the report to guide the evaluation of the essay's performance in the Coherence and Cohesion criterion.
-        4- Ensure consistency in the evaluation by referring to the report's findings and the official IELTS Writing {self.task} Coherence and Cohesion band descriptors.
-"""
-        self.lex_task2_analysis = f"""
+#         1- Carefully review the report, noting the identified Coherence and Cohesion issues, their categorization, and the provided examples from the essay.
+#         2- Consider the total issue count and the severity of the issues in relation to the IELTS Writing {self.task} Coherence and Cohesion band descriptors.
+#         3- Use the insights from the report to guide the evaluation of the essay's performance in the Coherence and Cohesion criterion.
+#         4- Ensure consistency in the evaluation by referring to the report's findings and the official IELTS Writing {self.task} Coherence and Cohesion band descriptors.
+# """
+#         self.lex_task2_analysis = f"""
 
-    You are an IELTS writing assistant tasked with detecting errors and mistakes in the lexical resources of IELTS Writing {self.task} essays. Your primary focus is to identify and categorize the lexical errors found in the essay to help the main evaluating function provide a reliable band score for the Lexical Resource criterion.
+#     You are an IELTS writing assistant tasked with detecting errors and mistakes in the lexical resources of IELTS Writing {self.task} essays. Your primary focus is to identify and categorize the lexical errors found in the essay to help the main evaluating function provide a reliable band score for the Lexical Resource criterion.
 
-        After carefully reviewing the essay text {self.essay}, generate a comprehensive report that lists and categorizes the lexical errors and mistakes found in the essay. Provide specific examples from the essay to support your observations.
+#         After carefully reviewing the essay text {self.essay}, generate a comprehensive report that lists and categorizes the lexical errors and mistakes found in the essay. Provide specific examples from the essay to support your observations.
 
-        The goal is to produce a consistent and reliable report that can assist the main evaluating function in determining an accurate band score for the essay's Lexical Resource based on the IELTS Writing {self.task} criteria.
+#         The goal is to produce a consistent and reliable report that can assist the main evaluating function in determining an accurate band score for the essay's Lexical Resource based on the IELTS Writing {self.task} criteria.
 
-        Report Structure:
+#         Report Structure:
 
-        Vocabulary Errors:
+#         Vocabulary Errors:
 
-        - Identify any errors related to vocabulary usage, such as incorrect word choice, inaccurate meaning, or inappropriate register.
-        - Provide a clear count of the total number of vocabulary errors found in the essay.
-        - Include specific examples of vocabulary errors from the essay.
+#         - Identify any errors related to vocabulary usage, such as incorrect word choice, inaccurate meaning, or inappropriate register.
+#         - Provide a clear count of the total number of vocabulary errors found in the essay.
+#         - Include specific examples of vocabulary errors from the essay.
         
-        Word Formation Errors:
+#         Word Formation Errors:
 
-        - Identify any errors related to word formation, such as incorrect prefixes, suffixes, or parts of speech.
-        - Provide a clear count of the total number of word formation errors found in the essay.
-        - Include specific examples of word formation errors from the essay.
+#         - Identify any errors related to word formation, such as incorrect prefixes, suffixes, or parts of speech.
+#         - Provide a clear count of the total number of word formation errors found in the essay.
+#         - Include specific examples of word formation errors from the essay.
         
-        Spelling Errors:
+#         Spelling Errors:
 
-        - Identify any spelling errors in the essay.
-        - Provide a clear count of the total number of spelling errors found in the essay.
-        - Include specific examples of spelling errors from the essay.
+#         - Identify any spelling errors in the essay.
+#         - Provide a clear count of the total number of spelling errors found in the essay.
+#         - Include specific examples of spelling errors from the essay.
         
-        Collocation Errors:
+#         Collocation Errors:
 
-        - Identify any errors related to collocations, such as incorrect word combinations or awkward phrasing.
-        - Provide a clear count of the total number of collocation errors found in the essay.
-        - Include specific examples of collocation errors from the essay.
+#         - Identify any errors related to collocations, such as incorrect word combinations or awkward phrasing.
+#         - Provide a clear count of the total number of collocation errors found in the essay.
+#         - Include specific examples of collocation errors from the essay.
         
-        Repetition and Redundancy:
+#         Repetition and Redundancy:
 
-        - Identify instances of unnecessary repetition or redundancy in the vocabulary used.
-        - Provide a clear count of the total number of repetition and redundancy issues found in the essay.
-        - Include specific examples of repetition and redundancy from the essay.
+#         - Identify instances of unnecessary repetition or redundancy in the vocabulary used.
+#         - Provide a clear count of the total number of repetition and redundancy issues found in the essay.
+#         - Include specific examples of repetition and redundancy from the essay.
         
-        Lexical Range and Sophistication:
+#         Lexical Range and Sophistication:
 
-        - Assess the range and sophistication of vocabulary used in the essay.
-        - Identify any instances of overuse or underuse of certain words or phrases.
-        - Provide suggestions for improving lexical diversity and sophistication.
+#         - Assess the range and sophistication of vocabulary used in the essay.
+#         - Identify any instances of overuse or underuse of certain words or phrases.
+#         - Provide suggestions for improving lexical diversity and sophistication.
         
-        also consider this terms carfully:
-        - Using a wide range of vocabulary accurately and appropriately
-        - Demonstrating the ability to use less common lexical items
-        - Avoiding repetition by using synonyms or paraphrasing
-        - Spelling words correctly and this is a brief of the mistakes that writer has done in his essay {self.grammar_check}
+#         also consider this terms carfully:
+#         - Using a wide range of vocabulary accurately and appropriately
+#         - Demonstrating the ability to use less common lexical items
+#         - Avoiding repetition by using synonyms or paraphrasing
+#         - Spelling words correctly and this is a brief of the mistakes that writer has done in his essay {self.grammar_check}
         
 
-        Total Lexical Error Count:
+#         Total Lexical Error Count:
 
-        Provide the total count of all lexical errors and mistakes identified in the essay.
-        Lexical Error Severity:
+#         Provide the total count of all lexical errors and mistakes identified in the essay.
+#         Lexical Error Severity:
 
-        Suggested Band Score:
+#         Suggested Band Score:
 
-        Provide a suggested band score for the essay based on the following criteria:
-        If the essay contains significant errors (more than 10) and lacks coherence or task fufilment, suggest a score between 3 and 5, and provide a specific score with justification.
-        If the essay is well-written, addresses the task effectively, and contains only minor errors (fewer than 5), suggest a score between 6 and 9, and provide a specific score with justification.
-        Support the suggested band score by referencing specific strengths and weaknesses identified in the report, as well as the error count.
-        Please provide a detailed and objective analysis of the essay, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations and provide constructive suggestions for improvement in each area. Be precise in your analysis and ensure that all mistakes and areas needing improvement are addressed.
+#         Provide a suggested band score for the essay based on the following criteria:
+#         If the essay contains significant errors (more than 10) and lacks coherence or task fufilment, suggest a score between 3 and 5, and provide a specific score with justification.
+#         If the essay is well-written, addresses the task effectively, and contains only minor errors (fewer than 5), suggest a score between 6 and 9, and provide a specific score with justification.
+#         Support the suggested band score by referencing specific strengths and weaknesses identified in the report, as well as the error count.
+#         Please provide a detailed and objective analysis of the essay, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations and provide constructive suggestions for improvement in each area. Be precise in your analysis and ensure that all mistakes and areas needing improvement are addressed.
 
-        Assess the severity of the identified lexical errors and their potential impact on the essay's overall quality and comprehensibility.
-        Categorize the lexical errors as minor, moderate, or severe based on their frequency and impact on the essay's effectiveness.
-        Please provide a detailed and objective analysis of the essay's lexical errors and mistakes, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations.
+#         Assess the severity of the identified lexical errors and their potential impact on the essay's overall quality and comprehensibility.
+#         Categorize the lexical errors as minor, moderate, or severe based on their frequency and impact on the essay's effectiveness.
+#         Please provide a detailed and objective analysis of the essay's lexical errors and mistakes, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations.
 
-        To use the generated report in assisting the main evaluating function:
+#         To use the generated report in assisting the main evaluating function:
 
-        Carefully review the report, noting the identified lexical errors, their categorization, and the provided examples from the essay.
-        Consider the total lexical error count and the severity of the errors in relation to the IELTS Writing {self.task} Lexical Resource band descriptors.
-        Use the insights from the report to guide the evaluation of the essay's performance in the Lexical Resource criterion.
-        Ensure consistency in the evaluation by referring to the report's findings and the official IELTS Writing {self.task} Lexical Resource band descriptors.
+#         Carefully review the report, noting the identified lexical errors, their categorization, and the provided examples from the essay.
+#         Consider the total lexical error count and the severity of the errors in relation to the IELTS Writing {self.task} Lexical Resource band descriptors.
+#         Use the insights from the report to guide the evaluation of the essay's performance in the Lexical Resource criterion.
+#         Ensure consistency in the evaluation by referring to the report's findings and the official IELTS Writing {self.task} Lexical Resource band descriptors.
 
-"""
-        self.tas_academic_task1_analysis = f"""
-        You are an IELTS writing assistant tasked with analyzing IELTS Writing Task 1 essays. Your primary focus is to identify potential issues that may impact the Task Response score, based on the official IELTS Task Response criteria for Task 1.
+# """
+#         self.tas_academic_task1_analysis = f"""
+#         You are an IELTS writing assistant tasked with analyzing IELTS Writing Task 1 essays. Your primary focus is to identify potential issues that may impact the Task Response score, based on the official IELTS Task Response criteria for Task 1.
 
-        After carefully reviewing the essay text {self.essay}, generate a comprehensive report that highlights the identified issues and provides specific examples from the essay to support your observations. Structure the report in a way that aligns with the IELTS Task Response criteria for Task 1.
+#         After carefully reviewing the essay text {self.essay}, generate a comprehensive report that highlights the identified issues and provides specific examples from the essay to support your observations. Structure the report in a way that aligns with the IELTS Task Response criteria for Task 1.
 
-        The goal is to produce a consistent and reliable report that can guide the evaluation of the essay's Task Response and provide valuable feedback to the candidate.
+#         The goal is to produce a consistent and reliable report that can guide the evaluation of the essay's Task Response and provide valuable feedback to the candidate.
 
-        Report Structure:
+#         Report Structure:
 
-        Overview:
+#         Overview:
 
-       - Assess if the essay provides a clear overview of the main features or key information from the given data/diagram.
-       - Identify any missing or irrelevant information in the overview.
-       - Provide concise suggestions for improving the overview.
+#        - Assess if the essay provides a clear overview of the main features or key information from the given data/diagram.
+#        - Identify any missing or irrelevant information in the overview.
+#        - Provide concise suggestions for improving the overview.
        
-        Key Features:
+#         Key Features:
 
-        - Evaluate if the essay covers the key features or trends presented in the data/diagram.
-        - Identify any missing or irrelevant key features.
-        - Offer specific recommendations to better highlight and explain the key features.
+#         - Evaluate if the essay covers the key features or trends presented in the data/diagram.
+#         - Identify any missing or irrelevant key features.
+#         - Offer specific recommendations to better highlight and explain the key features.
         
-         Data Comparison and Accuracy:
+#          Data Comparison and Accuracy:
 
-        - Assess if the essay accurately compares and contrasts the relevant data points or information.
-        - Identify any inaccuracies, inconsistencies, or misinterpretations of the data.
-        - Provide clear guidance for improving data comparison and accuracy.
+#         - Assess if the essay accurately compares and contrasts the relevant data points or information.
+#         - Identify any inaccuracies, inconsistencies, or misinterpretations of the data.
+#         - Provide clear guidance for improving data comparison and accuracy.
         
-        Logical Structure and Coherence:
+#         Logical Structure and Coherence:
 
-        - Evaluate the logical structure and coherence of the essay.
-        - Identify any areas where the flow of information is unclear or disjointed.
-        - Suggest concrete ways to enhance the logical structure and coherence of the response.
+#         - Evaluate the logical structure and coherence of the essay.
+#         - Identify any areas where the flow of information is unclear or disjointed.
+#         - Suggest concrete ways to enhance the logical structure and coherence of the response.
         
        
 
         
-        if the question asks the candidate to describe key features and make comparisons, 
-         but the candidate only describes the features without making comparisons, they will lose points in 
-         Task Response. Similarly, if the candidate misinterprets the data or describes irrelevant information, 
-         their score will be lowered. and the question is {self.question}
+#         if the question asks the candidate to describe key features and make comparisons, 
+#          but the candidate only describes the features without making comparisons, they will lose points in 
+#          Task Response. Similarly, if the candidate misinterprets the data or describes irrelevant information, 
+#          their score will be lowered. and the question is {self.question}
 
-        Word Count:
+#         Word Count:
 
-        Aim to write between 150-180 words and number of words in the essay is {self.num_words}
-        Ensure all key features are covered in sufficient detail if the number of words more than 220 this is a bad thing and would affect the score
+#         Aim to write between 150-180 words and number of words in the essay is {self.num_words}
+#         Ensure all key features are covered in sufficient detail if the number of words more than 220 this is a bad thing and would affect the score
         
         
-        Error Analysis:
+#         Error Analysis:
 
-        Carefully review the essay and identify any grammatical, lexical, and cohesive errors.
-        Provide a clear count of the total number of errors found in the essay.
-        Classify the errors into categories (e.g., grammar, vocabulary, coherence) to help guide feedback.
+#         Carefully review the essay and identify any grammatical, lexical, and cohesive errors.
+#         Provide a clear count of the total number of errors found in the essay.
+#         Classify the errors into categories (e.g., grammar, vocabulary, coherence) to help guide feedback.
         
-        Suggested Band Score:
+#         Suggested Band Score:
 
-        Provide a suggested band score for the essay based on the following criteria:
-        If the essay contains significant errors (more than 10) and lacks coherence, suggest a score between 3 and 5, and provide a specific score with justification.
-        If the essay is well-written, addresses the task effectively, and contains only minor errors (fewer than 5), suggest a score between 6 and 9, and provide a specific score with justification.
-        Support the suggested band score by referencing specific strengths and weaknesses identified in the report, as well as the error count.
-        Please provide a detailed and objective analysis of the essay, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations and provide constructive suggestions for improvement in each area. Be precise in your analysis and ensure that all mistakes and areas needing improvement are addressed.
+#         Provide a suggested band score for the essay based on the following criteria:
+#         If the essay contains significant errors (more than 10) and lacks coherence, suggest a score between 3 and 5, and provide a specific score with justification.
+#         If the essay is well-written, addresses the task effectively, and contains only minor errors (fewer than 5), suggest a score between 6 and 9, and provide a specific score with justification.
+#         Support the suggested band score by referencing specific strengths and weaknesses identified in the report, as well as the error count.
+#         Please provide a detailed and objective analysis of the essay, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations and provide constructive suggestions for improvement in each area. Be precise in your analysis and ensure that all mistakes and areas needing improvement are addressed.
 
-        To use the generated report in evaluating the Task 1 essay:
+#         To use the generated report in evaluating the Task 1 essay:
 
-        Carefully review the report, noting the identified issues, error count, and provided examples from the essay.
-        Assess the severity and impact of each identified issue and error on the essay's Task Response.
-        Consider the provided suggestions for improvement and determine if the candidate has effectively addressed these aspects in their essay.
-        Use the insights from the report, including the error count and suggested band score, to guide your evaluation of the essay's Task Response, in conjunction with the official IELTS Task Response band descriptors for Task 1.
-        Ensure consistency in your evaluation by referring to the report's findings and the official band descriptors.
-    """    
-        self.tas_general_task1_analysis = f"""
+#         Carefully review the report, noting the identified issues, error count, and provided examples from the essay.
+#         Assess the severity and impact of each identified issue and error on the essay's Task Response.
+#         Consider the provided suggestions for improvement and determine if the candidate has effectively addressed these aspects in their essay.
+#         Use the insights from the report, including the error count and suggested band score, to guide your evaluation of the essay's Task Response, in conjunction with the official IELTS Task Response band descriptors for Task 1.
+#         Ensure consistency in your evaluation by referring to the report's findings and the official band descriptors.
+#     """    
+#         self.tas_general_task1_analysis = f"""
 
-    You are an IELTS writing assistant tasked with analyzing IELTS Writing Task 1 General essays. Your primary focus is to identify potential issues that may impact the Task Response score, based on the official IELTS Task Response criteria for Task 1 General.
+#     You are an IELTS writing assistant tasked with analyzing IELTS Writing Task 1 General essays. Your primary focus is to identify potential issues that may impact the Task Response score, based on the official IELTS Task Response criteria for Task 1 General.
 
-        After carefully reviewing the essay text {self.essay}, generate a comprehensive report that highlights the identified issues and provides specific examples from the essay to support your observations. Structure the report in a way that aligns with the IELTS Task Response criteria for Task 1 General.
+#         After carefully reviewing the essay text {self.essay}, generate a comprehensive report that highlights the identified issues and provides specific examples from the essay to support your observations. Structure the report in a way that aligns with the IELTS Task Response criteria for Task 1 General.
 
-        The goal is to produce a consistent and reliable report that can guide the evaluation of the essay's Task Response and provide valuable feedback to the candidate.
+#         The goal is to produce a consistent and reliable report that can guide the evaluation of the essay's Task Response and provide valuable feedback to the candidate.
 
-        Report Structure:
+#         Report Structure:
 
-        Task Fulfillment:
+#         Task Fulfillment:
 
-        - Assess if the essay effectively addresses all parts of the task and provides an appropriate amount of detail.
-        - Identify any missing or irrelevant information in the response.
-        - Provide concise suggestions for improving task fulfillment.
+#         - Assess if the essay effectively addresses all parts of the task and provides an appropriate amount of detail.
+#         - Identify any missing or irrelevant information in the response.
+#         - Provide concise suggestions for improving task fulfillment.
         
-        Tone and Purpose:
+#         Tone and Purpose:
 
-        - Evaluate if the essay uses an appropriate tone and register for the given context and purpose.
-        - Identify any instances where the tone or register is inconsistent or inappropriate.
-        - Offer specific recommendations to better align the tone and register with the task.
+#         - Evaluate if the essay uses an appropriate tone and register for the given context and purpose.
+#         - Identify any instances where the tone or register is inconsistent or inappropriate.
+#         - Offer specific recommendations to better align the tone and register with the task.
         
-        Coherence and Cohesion:
+#         Coherence and Cohesion:
 
-        - Assess if the essay is well-organized, with clear progression and logical connections between ideas.
-        - Identify any areas where coherence or cohesion is lacking.
-        - Provide clear guidance for improving the essay's structure and flow.
+#         - Assess if the essay is well-organized, with clear progression and logical connections between ideas.
+#         - Identify any areas where coherence or cohesion is lacking.
+#         - Provide clear guidance for improving the essay's structure and flow.
         
-        Lexical Resource:
+#         Lexical Resource:
 
-        - Evaluate the range and accuracy of vocabulary used in the essay.
-        - Identify any errors in word choice, spelling, or word formation.
-        - Suggest ways to enhance the lexical resource and avoid repetition.
+#         - Evaluate the range and accuracy of vocabulary used in the essay.
+#         - Identify any errors in word choice, spelling, or word formation.
+#         - Suggest ways to enhance the lexical resource and avoid repetition.
         
-        Grammatical Range and Accuracy:
+#         Grammatical Range and Accuracy:
 
-        - Assess the variety and precision of grammatical structures used in the essay.
-        - Identify any grammatical errors or inconsistencies.
-        - Provide recommendations for improving grammatical range and accuracy.
+#         - Assess the variety and precision of grammatical structures used in the essay.
+#         - Identify any grammatical errors or inconsistencies.
+#         - Provide recommendations for improving grammatical range and accuracy.
         
-        you must also consider these terms carfully in evalauting duble check:
-        Addressing all parts of the task adequately:
+#         you must also consider these terms carfully in evalauting duble check:
+#         Addressing all parts of the task adequately:
 
-            Identify the purpose of the letter (e.g., request, complaint, invitation)
-            Address all bullet points or questions provided in the task
-            Include any additional information relevant to the situation
+#             Identify the purpose of the letter (e.g., request, complaint, invitation)
+#             Address all bullet points or questions provided in the task
+#             Include any additional information relevant to the situation
             
-        Presenting a clear position:
+#         Presenting a clear position:
 
-            Begin with an appropriate salutation and brief introduction
-            Clearly state the purpose of the letter in the opening paragraph
+#             Begin with an appropriate salutation and brief introduction
+#             Clearly state the purpose of the letter in the opening paragraph
             
-        Supporting ideas with relevant explanations and examples:
+#         Supporting ideas with relevant explanations and examples:
 
-            Provide specific details, explanations, or examples for each bullet point or question
-            Use a friendly, polite, or formal tone as appropriate for the situation
+#             Provide specific details, explanations, or examples for each bullet point or question
+#             Use a friendly, polite, or formal tone as appropriate for the situation
             
-        Fully developing the topic within the given word count:
+#         Fully developing the topic within the given word count:
 
-            Aim to write between 150-180 words and number of words in the essay is {self.num_words}
-            Ensure all bullet points or questions are addressed in sufficient detail
-            Conclude the letter with a suitable closing remark and sign-off
+#             Aim to write between 150-180 words and number of words in the essay is {self.num_words}
+#             Ensure all bullet points or questions are addressed in sufficient detail
+#             Conclude the letter with a suitable closing remark and sign-off
         
-        Word Count:
+#         Word Count:
 
-        Check if the essay meets the minimum word count requirement (150 words) and report the actual number of words {self.num_words}.
-        Error Analysis:
+#         Check if the essay meets the minimum word count requirement (150 words) and report the actual number of words {self.num_words}.
+#         Error Analysis:
 
-        Carefully review the essay and identify any errors related to task fulfillment, coherence, lexical resource, and grammar.
-        Provide a clear count of the total number of errors found in the essay.
-        Classify the errors into categories (e.g., task fulfillment, coherence, vocabulary, grammar) to help guide feedback.
-        Suggested Band Score:
+#         Carefully review the essay and identify any errors related to task fulfillment, coherence, lexical resource, and grammar.
+#         Provide a clear count of the total number of errors found in the essay.
+#         Classify the errors into categories (e.g., task fulfillment, coherence, vocabulary, grammar) to help guide feedback.
+#         Suggested Band Score:
 
-        Provide a suggested band score for the essay based on the following criteria:
-        If the essay contains significant errors (more than 10) and lacks coherence or task fulfillment, suggest a score between 3 and 5, and provide a specific score with justification.
-        If the essay is well-written, addresses the task effectively, and contains only minor errors (fewer than 5), suggest a score between 6 and 9, and provide a specific score with justification.
-        Support the suggested band score by referencing specific strengths and weaknesses identified in the report, as well as the error count.
-        Please provide a detailed and objective analysis of the essay, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations and provide constructive suggestions for improvement in each area. Be precise in your analysis and ensure that all mistakes and areas needing improvement are addressed.
+#         Provide a suggested band score for the essay based on the following criteria:
+#         If the essay contains significant errors (more than 10) and lacks coherence or task fulfillment, suggest a score between 3 and 5, and provide a specific score with justification.
+#         If the essay is well-written, addresses the task effectively, and contains only minor errors (fewer than 5), suggest a score between 6 and 9, and provide a specific score with justification.
+#         Support the suggested band score by referencing specific strengths and weaknesses identified in the report, as well as the error count.
+#         Please provide a detailed and objective analysis of the essay, focusing on the aspects mentioned above. Use specific examples from the essay to support your observations and provide constructive suggestions for improvement in each area. Be precise in your analysis and ensure that all mistakes and areas needing improvement are addressed.
 
-        To use the generated report in evaluating the Task 1 General essay:
+#         To use the generated report in evaluating the Task 1 General essay:
 
-        1- Carefully review the report, noting the identified issues, error count, and provided examples from the essay.
-        2- Assess the severity and impact of each identified issue and error on the essay's Task Response.
-        3- Consider the provided suggestions for improvement and determine if the candidate has effectively addressed these aspects in their essay.
-        4- Use the insights from the report, including the error count and suggested band score, to guide your evaluation of the essay's Task Response, in conjunction with the official IELTS Task Response band descriptors for Task 1 General.
-        5- Ensure consistency in your evaluation by referring to the report's findings and the official band descriptors.
+#         1- Carefully review the report, noting the identified issues, error count, and provided examples from the essay.
+#         2- Assess the severity and impact of each identified issue and error on the essay's Task Response.
+#         3- Consider the provided suggestions for improvement and determine if the candidate has effectively addressed these aspects in their essay.
+#         4- Use the insights from the report, including the error count and suggested band score, to guide your evaluation of the essay's Task Response, in conjunction with the official IELTS Task Response band descriptors for Task 1 General.
+#         5- Ensure consistency in your evaluation by referring to the report's findings and the official band descriptors.
 
 
-"""       
+# """       
         
     def evaluate_essay(self, essay, task, question, task_type_specification):
         self.essay += str(essay)
@@ -1122,16 +1118,16 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         if task == 'Task 1':
             # Determine the appropriate analysis based on the task type specification
             if task_type_specification.lower() == 'academic':
-                task_analysis = self.essay_analysis(self.tas_academic_task1_analysis)
-                self.task_resp_1_aca +=task_analysis
-                suggest_score = self.suggested_score_ana(task_analysis, task)
-                self.suggeted_score += suggest_score
+                # task_analysis = self.essay_analysis(self.tas_academic_task1_analysis)
+                # self.task_resp_1_aca +=task_analysis
+                # suggest_score = self.suggested_score_ana(task_analysis, task)
+                # self.suggeted_score += suggest_score
                 task_response_score, task_response_text = self.evaluate_task1_response_aca(essay)
             elif task_type_specification.lower() == 'general':
-                task_analysis = self.essay_analysis(self.tas_general_task1_analysis)
-                self.task_resp_1_gen +=task_analysis
-                suggest_score = self.suggested_score_ana(task_analysis, task)
-                self.suggeted_score += suggest_score
+                # task_analysis = self.essay_analysis(self.tas_general_task1_analysis)
+                # self.task_resp_1_gen +=task_analysis
+                # suggest_score = self.suggested_score_ana(task_analysis, task)
+                # self.suggeted_score += suggest_score
                 task_response_score, task_response_text = self.evaluate_task1_response_gen(essay)
             else:
                 raise ValueError("Invalid task type specification.")
@@ -1145,24 +1141,24 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
             #     task_response_score, task_response_text = self.evaluate_task1_response_gen(essay)
         else:
             # For Task 2, proceed as before
-            task_analysis = self.essay_analysis(self.tr_task2_analysis)
-            self.TR_task += task_analysis
-            suggest_score = self.suggested_score_ana(task_analysis, task)
-            self.suggeted_score += suggest_score
+            # task_analysis = self.essay_analysis(self.tr_task2_analysis)
+            # self.TR_task += task_analysis
+            # suggest_score = self.suggested_score_ana(task_analysis, task)
+            # self.suggeted_score += suggest_score
             task_response_score, task_response_text = self.evaluate_task_response(essay)
                 
-        self.suggeted_score = ''
-        coherence_cohesion_analysis = self.essay_analysis(self.co_task2_analysis)
-        self.coherence += coherence_cohesion_analysis
-        suggest_score = self.suggested_score_ana(coherence_cohesion_analysis, task)
-        self.suggeted_score += suggest_score
+        # self.suggeted_score = ''
+        # coherence_cohesion_analysis = self.essay_analysis(self.co_task2_analysis)
+        # self.coherence += coherence_cohesion_analysis
+        # suggest_score = self.suggested_score_ana(coherence_cohesion_analysis, task)
+        # self.suggeted_score += suggest_score
         coherence_cohesion_score, coherence_cohesion_text = self.evaluate_coherence_cohesion(essay)
             
-        self.suggeted_score = ''
-        lexical_resources_analysis = self.essay_analysis(self.lex_task2_analysis)
-        self.lexic += lexical_resources_analysis
-        suggest_score = self.suggested_score_ana(lexical_resources_analysis, task)
-        self.suggeted_score += suggest_score
+        # self.suggeted_score = ''
+        # lexical_resources_analysis = self.essay_analysis(self.lex_task2_analysis)
+        # self.lexic += lexical_resources_analysis
+        # suggest_score = self.suggested_score_ana(lexical_resources_analysis, task)
+        # self.suggeted_score += suggest_score
         lexical_resources_score, lexical_resources_text = self.evaluate_lexical_resources(essay)
         self.suggeted_score = ''
         grammar_accuracy_score, grammar_accuracy_text = self.evaluate_grammar_accuracy(essay)
@@ -1597,15 +1593,42 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
         cleaned_response, score = self.remove_band_score(response)
         return score, cleaned_response
 
+    # def remove_band_score(self, result):
+    #     digit = self.extract_digit_from_essay(result)
+    #     if digit is None:
+    #         print('No score found in the evaluation result')
+    #         raise Exception("Error occurred while calling Claude API")
+    #         # return result, None
+    #     else:
+    #         num = float(digit)
+    #         print('the score is ',num)
+    #         if num <= 3:
+    #             raise Exception("Error: Score is too low")
+    #         if '**Band Score**:' in result:
+    #             pattern = re.compile(r'\*{0,2}Band Score\*{0,2}:?\s*\*{0,2}\d+(\.\d+)?\*{0,2}\n?|\*+\n?', re.IGNORECASE)
+    #         else:
+    #             pattern = re.compile(r'(\*{2})?Band Score:?(\*{2})?\s*\d+(\.\d+)?(\*{2})?\n+', re.IGNORECASE)
+    #         cleaned_result = pattern.sub('', result)
+            
+    #         patter = r'[_*[\]()~`>#+-=|{}.!]'
+            
+    #         # Replace special characters with an empty string
+    #         cleaned_text = re.sub(patter, '', cleaned_result)
+
+    #         rounded_score = round(num - 0.1)
+            
+    #         self.band_score.append(rounded_score)
+    #         cleaned_result = f"{cleaned_text}"
+
+    #         return cleaned_result, rounded_score
     def remove_band_score(self, result):
         digit = self.extract_digit_from_essay(result)
         if digit is None:
             print('No score found in the evaluation result')
             raise Exception("Error occurred while calling Claude API")
-            # return result, None
         else:
             num = float(digit)
-            print('the score is ',num)
+            print('the score is ', num)
             if num <= 3:
                 raise Exception("Error: Score is too low")
             if '**Band Score**:' in result:
@@ -1613,19 +1636,17 @@ Remember to maintain a supportive and constructive tone throughout your evaluati
             else:
                 pattern = re.compile(r'(\*{2})?Band Score:?(\*{2})?\s*\d+(\.\d+)?(\*{2})?\n+', re.IGNORECASE)
             cleaned_result = pattern.sub('', result)
-            
-            patter = r'[_*[\]()~`>#+-=|{}.!]'
-            
-            # Replace special characters with an empty string
-            cleaned_text = re.sub(patter, '', cleaned_result)
-
-            rounded_score = round(num - 0.1)
-            
+            pattern = r'[_*[\]()~`>#+-=|{}.!]'
+            cleaned_text = re.sub(pattern, '', cleaned_result)
+            if num == 8.5:
+                rounded_score = 9
+            elif num == 7.5:
+                rounded_score = 8
+            else:
+                rounded_score = round(num - 0.1)
             self.band_score.append(rounded_score)
             cleaned_result = f"{cleaned_text}"
-
             return cleaned_result, rounded_score
-
     def extract_digit_from_essay(self, essay):
         digit = re.search(r'(?:^|\D)([3-9](?:\.\d+)?)(?!\d)', essay)
         if digit:
